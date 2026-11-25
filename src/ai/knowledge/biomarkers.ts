@@ -1,0 +1,381 @@
+import type { Specialty } from "../types";
+
+/**
+ * Biomarker dictionary: aliases for deterministic extraction + conservative, source-linked
+ * educational content. NOTE: no reference ranges are stored here on purpose — SanoAI only
+ * compares results with the reference range printed by the laboratory on the report itself.
+ */
+export interface BiomarkerDef {
+  key: string;
+  name: string;
+  aliases: string[];
+  specialty: Specialty;
+  /** Shown in the Deficiency Finder panel. */
+  panel: boolean;
+  what: string;
+  reasonsLow: string[];
+  reasonsHigh: string[];
+  limitations: string[];
+  missing: string[];
+  questions: string[];
+  sourceIds: string[];
+}
+
+const COMMON_LIMITS = [
+  "Laboratories use different methods, units and reference ranges, so values from different labs are not always directly comparable.",
+  "A single result is a snapshot; clinicians interpret it alongside symptoms, history and repeat tests.",
+];
+
+export const BIOMARKERS: BiomarkerDef[] = [
+  {
+    key: "vitamin_b12",
+    name: "Vitamin B12",
+    aliases: ["vitamin b12", "vit b12", "vit. b12", "cyanocobalamin", "cobalamin", "b12"],
+    specialty: "Nutrition",
+    panel: true,
+    what: "Vitamin B12 helps the body make red blood cells and DNA and supports normal nerve function.",
+    reasonsLow: [
+      "Low dietary intake — more likely with strict vegan or very restricted diets that lack fortified foods.",
+      "Reduced absorption — for example age-related changes in stomach acid, pernicious anaemia, coeliac disease, or past stomach/bowel surgery.",
+      "Some medicines are associated with lower B12 absorption over time, such as long-term metformin or acid-reducing medicines.",
+    ],
+    reasonsHigh: ["Recent B12 supplements or injections, and some liver or blood conditions, can be associated with high levels."],
+    limitations: [
+      ...COMMON_LIMITS,
+      "Borderline B12 results can be hard to interpret; clinicians sometimes use additional tests (for example methylmalonic acid) when a result is unclear.",
+      "SanoAI cannot tell from a number alone whether you are deficient.",
+    ],
+    missing: [
+      "Diet history (e.g. vegetarian/vegan eating pattern)",
+      "Medication list (for example metformin or acid-reducing medicines)",
+      "Whether the blood count (haemoglobin, MCV) was checked at the same time",
+      "Any symptoms such as tingling, numbness or memory changes — worth mentioning to your doctor",
+    ],
+    questions: [
+      "Could my medicines or diet be affecting my B12 level, and does it need a repeat or follow-up test?",
+      "Was my blood count checked alongside this result, and what does it show?",
+    ],
+    sourceIds: ["ods-b12", "medlineplus-anemia"],
+  },
+  {
+    key: "vitamin_d",
+    name: "Vitamin D (25-hydroxy)",
+    aliases: ["vitamin d", "vit d", "vit. d", "25ohd", "calcidiol"],
+    specialty: "Nutrition",
+    panel: true,
+    what: "Vitamin D helps the body absorb calcium and supports bone and muscle health. The blood test usually measures 25-hydroxyvitamin D, the main circulating form.",
+    reasonsLow: [
+      "Limited sun exposure (indoor lifestyle, covering clothing, winter, higher latitudes) and darker skin pigmentation reduce vitamin D production.",
+      "Low dietary intake — few foods are naturally rich in vitamin D.",
+      "Conditions that reduce absorption (for example coeliac disease or inflammatory bowel disease) and some kidney or liver conditions.",
+      "Higher body weight and some medicines are also associated with lower levels.",
+    ],
+    reasonsHigh: ["High levels are most often linked to high-dose supplements; this should be reviewed by a clinician."],
+    limitations: [
+      ...COMMON_LIMITS,
+      "Cut-offs used to describe 'deficient' or 'insufficient' differ between guidelines and laboratories.",
+      "Evidence for benefits of vitamin D beyond bone health is still being studied and is mixed.",
+    ],
+    missing: ["Sun exposure and diet", "Calcium and kidney function results", "Any bone-health history or fractures", "Current supplements"],
+    questions: [
+      "What is the likely reason for my vitamin D result, and do I need a repeat test?",
+      "Should my calcium and kidney function be reviewed alongside this?",
+    ],
+    sourceIds: ["ods-vitd"],
+  },
+  {
+    key: "iron",
+    name: "Serum iron",
+    aliases: ["serum iron", "iron, serum", "iron (serum)", "iron"],
+    specialty: "Haematology",
+    panel: true,
+    what: "Serum iron measures the iron circulating in the blood. It varies through the day and with recent meals or supplements, so it is usually interpreted with ferritin and other iron studies.",
+    reasonsLow: [
+      "Low iron intake or absorption, blood loss, or increased needs (for example pregnancy).",
+      "Inflammation or chronic illness can also lower serum iron.",
+    ],
+    reasonsHigh: ["Recent iron supplements before the test, or iron-overload conditions, can raise serum iron."],
+    limitations: [...COMMON_LIMITS, "Serum iron fluctuates; on its own it is a poor guide to iron stores."],
+    missing: ["Ferritin, transferrin saturation / TIBC", "Haemoglobin and MCV", "Whether iron supplements were taken before the test"],
+    questions: ["Do I need ferritin or other iron studies to interpret this result?"],
+    sourceIds: ["ods-iron", "medlineplus-anemia"],
+  },
+  {
+    key: "ferritin",
+    name: "Ferritin",
+    aliases: ["serum ferritin", "ferritin"],
+    specialty: "Haematology",
+    panel: true,
+    what: "Ferritin is a protein that stores iron. The blood level is commonly used as a marker of the body's iron stores.",
+    reasonsLow: [
+      "Low iron intake or reduced absorption (for example coeliac disease).",
+      "Blood loss — for example heavy menstrual bleeding or bleeding in the digestive tract.",
+      "Increased needs, such as during pregnancy or growth.",
+    ],
+    reasonsHigh: [
+      "Ferritin rises with inflammation, infection and liver disease, so it can be raised even when iron stores are not high.",
+      "Iron-overload conditions and frequent transfusions can also raise ferritin.",
+    ],
+    limitations: [
+      ...COMMON_LIMITS,
+      "Because inflammation raises ferritin, a 'normal' ferritin does not always rule out low iron stores.",
+    ],
+    missing: ["Haemoglobin and MCV", "Menstrual / digestive-bleeding history", "Inflammation markers (e.g. CRP)", "Diet and medication history"],
+    questions: [
+      "What could be causing my ferritin result, and is any further investigation appropriate?",
+      "Should possible sources of blood loss or poor absorption be considered?",
+    ],
+    sourceIds: ["medlineplus-ferritin", "ods-iron"],
+  },
+  {
+    key: "tibc",
+    name: "TIBC (iron binding capacity)",
+    aliases: ["total iron binding capacity", "iron binding capacity", "tibc"],
+    specialty: "Haematology",
+    panel: false,
+    what: "TIBC reflects how much iron the blood's transport protein (transferrin) could carry. It is read together with serum iron and ferritin.",
+    reasonsLow: ["Inflammation or chronic illness can lower TIBC."],
+    reasonsHigh: ["TIBC is often raised when iron stores are low."],
+    limitations: COMMON_LIMITS,
+    missing: ["Serum iron, ferritin, transferrin saturation"],
+    questions: ["How do my iron studies fit together?"],
+    sourceIds: ["ods-iron"],
+  },
+  {
+    key: "transferrin_saturation",
+    name: "Transferrin saturation",
+    aliases: ["transferrin saturation", "iron saturation", "tsat"],
+    specialty: "Haematology",
+    panel: false,
+    what: "Transferrin saturation estimates how much of the iron-carrying protein is occupied by iron.",
+    reasonsLow: ["Often low when iron supply is low."],
+    reasonsHigh: ["High values can occur with iron supplements or iron-overload conditions."],
+    limitations: COMMON_LIMITS,
+    missing: ["Ferritin, haemoglobin"],
+    questions: ["Do these iron studies point to a cause that should be explored?"],
+    sourceIds: ["ods-iron"],
+  },
+  {
+    key: "hemoglobin",
+    name: "Haemoglobin",
+    aliases: ["haemoglobin", "hemoglobin", "hgb", "hb"],
+    specialty: "Haematology",
+    panel: true,
+    what: "Haemoglobin is the protein in red blood cells that carries oxygen. Low haemoglobin is called anaemia, which has many possible causes.",
+    reasonsLow: [
+      "Iron deficiency (the most common cause worldwide), low B12 or folate, blood loss, chronic disease, kidney disease, and inherited blood conditions.",
+      "Normal values differ by age, sex, pregnancy and altitude.",
+    ],
+    reasonsHigh: ["Dehydration, smoking, living at altitude, lung disease, and some blood disorders can be associated with higher haemoglobin."],
+    limitations: [
+      ...COMMON_LIMITS,
+      "Haemoglobin alone does not identify the cause of anaemia; red-cell indices (MCV) and iron studies help narrow it down.",
+    ],
+    missing: ["MCV / red cell indices", "Ferritin and iron studies", "B12 and folate", "Bleeding history, diet, medicines"],
+    questions: [
+      "What is the most likely reason for my haemoglobin result, and which tests would help find out?",
+      "Do my MCV and iron studies fit with each other?",
+    ],
+    sourceIds: ["medlineplus-anemia", "who-anaemia"],
+  },
+  {
+    key: "mcv",
+    name: "MCV (red cell size)",
+    aliases: ["mean corpuscular volume", "mean cell volume", "mcv"],
+    specialty: "Haematology",
+    panel: false,
+    what: "MCV is the average size of red blood cells. Small cells (low MCV) and large cells (high MCV) point clinicians toward different groups of causes.",
+    reasonsLow: ["Low MCV is associated with iron deficiency and some inherited blood conditions."],
+    reasonsHigh: ["High MCV is associated with low B12 or folate, alcohol use, thyroid problems, liver disease and some medicines."],
+    limitations: COMMON_LIMITS,
+    missing: ["Haemoglobin, ferritin, B12, folate"],
+    questions: ["What does my MCV suggest about the type of anaemia, if any?"],
+    sourceIds: ["medlineplus-anemia"],
+  },
+  {
+    key: "calcium",
+    name: "Calcium",
+    aliases: ["corrected calcium", "total calcium", "serum calcium", "calcium"],
+    specialty: "Endocrinology",
+    panel: true,
+    what: "Calcium is needed for bones, muscles, nerves and heart rhythm. The blood level is tightly controlled by the body (vitamin D and parathyroid hormone are key regulators).",
+    reasonsLow: [
+      "Low vitamin D, low albumin, kidney disease, parathyroid problems and some medicines.",
+      "Total calcium depends on albumin, so labs sometimes report an albumin-corrected value.",
+    ],
+    reasonsHigh: ["Overactive parathyroid glands are a common cause; high vitamin D intake, some cancers and some medicines can also contribute."],
+    limitations: [...COMMON_LIMITS, "Blood calcium can be normal even when dietary intake is low, because the body draws on bone to keep it stable."],
+    missing: ["Albumin", "Vitamin D", "Kidney function", "Parathyroid hormone if abnormal"],
+    questions: ["Is my calcium result consistent with my vitamin D and kidney function?"],
+    sourceIds: ["ods-calcium"],
+  },
+  {
+    key: "folate",
+    name: "Folate",
+    aliases: ["serum folate", "folic acid", "vitamin b9", "folate"],
+    specialty: "Nutrition",
+    panel: true,
+    what: "Folate (vitamin B9) is needed to make DNA and red blood cells, and is important before and during pregnancy.",
+    reasonsLow: [
+      "Low intake of leafy greens, legumes and fortified foods.",
+      "Reduced absorption (for example coeliac disease), heavy alcohol use, pregnancy and some medicines.",
+    ],
+    reasonsHigh: ["Recent folic acid supplements or fortified foods can raise the blood level."],
+    limitations: [...COMMON_LIMITS, "Folate level reflects recent intake; low B12 can be hidden or confused with low folate."],
+    missing: ["Diet and alcohol history", "B12 level", "Haemoglobin and MCV", "Medication list"],
+    questions: ["Should my B12 and folate be interpreted together with my blood count?"],
+    sourceIds: ["ods-folate"],
+  },
+  {
+    key: "tsh",
+    name: "TSH (thyroid stimulating hormone)",
+    aliases: ["thyroid stimulating hormone", "thyrotropin", "tsh"],
+    specialty: "Endocrinology",
+    panel: false,
+    what: "TSH is made by the pituitary gland and tells the thyroid how much hormone to produce. It is usually the first thyroid test.",
+    reasonsLow: ["Low TSH can be associated with an overactive thyroid or some medicines."],
+    reasonsHigh: ["A raised TSH is commonly associated with an underactive thyroid, but it can also be temporarily raised during recovery from illness."],
+    limitations: [...COMMON_LIMITS, "TSH is usually interpreted with free T4, symptoms and sometimes a repeat test."],
+    missing: ["Free T4", "Thyroid antibodies if clinically relevant", "Symptoms and medicines"],
+    questions: ["Do I need free T4 or a repeat TSH to understand this result?"],
+    sourceIds: ["medlineplus-hypothyroid"],
+  },
+  {
+    key: "free_t4",
+    name: "Free T4",
+    aliases: ["free thyroxine", "free t4", "ft4"],
+    specialty: "Endocrinology",
+    panel: false,
+    what: "Free T4 is the active thyroid hormone circulating in the blood; it is read together with TSH.",
+    reasonsLow: ["Low free T4 with raised TSH is a pattern associated with an underactive thyroid."],
+    reasonsHigh: ["High free T4 is associated with an overactive thyroid."],
+    limitations: COMMON_LIMITS,
+    missing: ["TSH", "Symptoms and medicines"],
+    questions: ["How do my TSH and free T4 fit together?"],
+    sourceIds: ["medlineplus-hypothyroid"],
+  },
+  {
+    key: "hba1c",
+    name: "HbA1c",
+    aliases: ["glycated haemoglobin", "glycated hemoglobin", "glycosylated haemoglobin", "hba1c", "hb a1c", "a1c"],
+    specialty: "Endocrinology",
+    panel: false,
+    what: "HbA1c reflects average blood sugar over roughly the previous 2–3 months.",
+    reasonsLow: ["Some anaemias and blood conditions can make HbA1c unreliable."],
+    reasonsHigh: ["Persistently raised HbA1c is associated with diabetes or pre-diabetes; diagnosis requires clinical confirmation."],
+    limitations: [...COMMON_LIMITS, "Iron-deficiency anaemia and some other blood conditions can affect HbA1c accuracy."],
+    missing: ["Fasting glucose", "Repeat test", "Anaemia status", "Symptoms and family history"],
+    questions: ["Do I need repeat testing or other measures to interpret my HbA1c?"],
+    sourceIds: ["who-diabetes", "medlineplus-diabetes"],
+  },
+  {
+    key: "fasting_glucose",
+    name: "Fasting glucose",
+    aliases: ["fasting blood glucose", "fasting blood sugar", "glucose fasting", "glucose (fasting)", "fasting glucose", "fasting plasma glucose", "fbs", "fbg", "fpg"],
+    specialty: "Endocrinology",
+    panel: false,
+    what: "Fasting glucose is the blood sugar level after not eating for at least 8 hours.",
+    reasonsLow: ["Low glucose can relate to medicines, prolonged fasting or other conditions."],
+    reasonsHigh: ["Raised fasting glucose can be associated with pre-diabetes or diabetes, but also with stress, illness or not truly fasting."],
+    limitations: [...COMMON_LIMITS, "A single raised value is not a diagnosis; clinicians confirm with repeat or additional tests."],
+    missing: ["Whether the sample was truly fasting", "HbA1c", "Repeat measurement"],
+    questions: ["Was this a true fasting sample, and should it be repeated or confirmed?"],
+    sourceIds: ["who-diabetes", "medlineplus-diabetes"],
+  },
+  {
+    key: "ldl",
+    name: "LDL cholesterol",
+    aliases: ["ldl cholesterol", "ldl-c", "ldl"],
+    specialty: "Cardiology",
+    panel: false,
+    what: "LDL cholesterol is often called 'bad' cholesterol because higher levels are associated with greater build-up of fatty deposits in arteries over time.",
+    reasonsLow: ["Very low LDL is uncommon and may relate to medicines or genetics."],
+    reasonsHigh: [
+      "Diet high in saturated fat, family history, underactive thyroid, diabetes, kidney conditions and some medicines can be associated with higher LDL.",
+    ],
+    limitations: [...COMMON_LIMITS, "What counts as a 'target' LDL depends on your overall cardiovascular risk, which only a clinician can assess."],
+    missing: ["Overall cardiovascular risk factors (age, blood pressure, diabetes, smoking)", "Thyroid status", "Family history"],
+    questions: ["What does my LDL mean in the context of my overall cardiovascular risk?"],
+    sourceIds: ["medlineplus-cholesterol", "who-cvd"],
+  },
+  {
+    key: "hdl",
+    name: "HDL cholesterol",
+    aliases: ["hdl cholesterol", "hdl-c", "hdl"],
+    specialty: "Cardiology",
+    panel: false,
+    what: "HDL cholesterol is often called 'good' cholesterol; low levels are associated with higher cardiovascular risk.",
+    reasonsLow: ["Inactivity, smoking, excess weight and diabetes are associated with lower HDL."],
+    reasonsHigh: ["Genetics, exercise and moderate alcohol intake can be associated with higher HDL."],
+    limitations: COMMON_LIMITS,
+    missing: ["Full lipid profile and overall risk assessment"],
+    questions: ["How does my lipid profile fit my overall cardiovascular risk?"],
+    sourceIds: ["medlineplus-cholesterol"],
+  },
+  {
+    key: "total_cholesterol",
+    name: "Total cholesterol",
+    aliases: ["total cholesterol", "cholesterol total", "cholesterol, total", "serum cholesterol"],
+    specialty: "Cardiology",
+    panel: false,
+    what: "Total cholesterol is the sum of cholesterol carried by all lipoproteins.",
+    reasonsLow: ["Usually not a concern on its own."],
+    reasonsHigh: ["Diet, genetics, thyroid and metabolic conditions can raise total cholesterol."],
+    limitations: COMMON_LIMITS,
+    missing: ["LDL, HDL and triglycerides"],
+    questions: ["Which part of my lipid profile matters most for me?"],
+    sourceIds: ["medlineplus-cholesterol"],
+  },
+  {
+    key: "triglycerides",
+    name: "Triglycerides",
+    aliases: ["triglycerides", "triglyceride", "tg"],
+    specialty: "Cardiology",
+    panel: false,
+    what: "Triglycerides are a type of fat in the blood; levels rise after meals, with alcohol, and with some metabolic conditions.",
+    reasonsLow: ["Usually not a concern."],
+    reasonsHigh: ["Non-fasting samples, alcohol, excess sugar, diabetes and underactive thyroid can be associated with high triglycerides."],
+    limitations: [...COMMON_LIMITS, "Triglycerides are strongly affected by recent meals."],
+    missing: ["Whether the sample was fasting"],
+    questions: ["Was this a fasting sample, and should it be repeated?"],
+    sourceIds: ["medlineplus-cholesterol"],
+  },
+  {
+    key: "creatinine",
+    name: "Creatinine",
+    aliases: ["serum creatinine", "creatinine"],
+    specialty: "Nephrology",
+    panel: false,
+    what: "Creatinine is a waste product filtered by the kidneys; it is used (with age and sex) to estimate kidney filtration (eGFR).",
+    reasonsLow: ["Low muscle mass can lead to low creatinine."],
+    reasonsHigh: ["Reduced kidney function, dehydration, high muscle mass, some medicines and recent intense exercise or meat intake can raise creatinine."],
+    limitations: [...COMMON_LIMITS, "Creatinine depends on muscle mass and hydration."],
+    missing: ["eGFR", "Urine albumin test", "Blood pressure and diabetes status"],
+    questions: ["Do I need eGFR or a urine test to assess my kidney function properly?"],
+    sourceIds: ["medlineplus-ckd"],
+  },
+  {
+    key: "egfr",
+    name: "eGFR",
+    aliases: ["estimated gfr", "egfr", "gfr"],
+    specialty: "Nephrology",
+    panel: false,
+    what: "eGFR estimates how well the kidneys filter blood.",
+    reasonsLow: ["Chronic kidney disease, dehydration, some medicines and acute illness can lower eGFR."],
+    reasonsHigh: ["Usually not a concern."],
+    limitations: [...COMMON_LIMITS, "Kidney disease is generally assessed with repeat tests over time, not a single value."],
+    missing: ["Repeat eGFR over 3 months", "Urine albumin test"],
+    questions: ["Should my kidney function be repeated or monitored?"],
+    sourceIds: ["medlineplus-ckd"],
+  },
+];
+
+export const BIOMARKER_BY_KEY = new Map(BIOMARKERS.map((b) => [b.key, b]));
+
+/** (alias, key) pairs sorted longest-first so "total iron binding capacity" wins over "iron". */
+export const ALIAS_INDEX: { alias: string; key: string }[] = BIOMARKERS.flatMap((b) => b.aliases.map((a) => ({ alias: a, key: b.key }))).sort(
+  (a, b) => b.alias.length - a.alias.length,
+);
+
+/** The seven markers the Deficiency Finder is built around. */
+export const DEFICIENCY_PANEL = ["vitamin_b12", "vitamin_d", "iron", "ferritin", "hemoglobin", "calcium", "folate"];

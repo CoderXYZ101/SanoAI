@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Sora Variable", "Inter Variable", ui-sans-serif, sans-serif;
+  --ink: #0a1428;
+  --paper: #f5f8fb;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-paper font-sans text-navy-900 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    background: rgba(44, 203, 200, 0.28);
+  }
+  :focus-visible {
+    outline: 2px solid #14afb1;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  h1, h2, h3 {
+    @apply font-display tracking-tight;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-navy-100/80 bg-white shadow-soft;
+  }
+  .card-pad {
+    @apply p-5 sm:p-6;
+  }
+  .glass {
+    @apply border border-white/10 bg-white/[0.06] backdrop-blur-xl;
+  }
+  .glass-light {
+    @apply border border-white/60 bg-white/70 backdrop-blur-xl;
+  }
+  .text-gradient {
+    background: linear-gradient(95deg, #5fe3dc 0%, #22d3ee 55%, #8fb8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-sano-600;
+  }
+  .bg-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 30%, black 20%, transparent 75%);
+  }
+  .field {
+    @apply w-full rounded-xl border border-navy-100 bg-white px-3.5 py-2.5 text-sm text-navy-900 shadow-sm outline-none transition placeholder:text-navy-300 focus:border-sano-400 focus:ring-4 focus:ring-sano-200/50 disabled:cursor-not-allowed disabled:bg-navy-50;
+  }
+  .prose-sano p {
+    @apply my-2 leading-relaxed;
+  }
+  .prose-sano ul {
+    @apply my-2 list-disc space-y-1 pl-5;
+  }
+  .prose-sano h3 {
+    @apply mb-1 mt-3 text-base font-semibold text-navy-900;
+  }
+  .prose-sano a {
+    @apply text-sano-700 underline underline-offset-2;
+  }
+  .prose-sano strong {
+    @apply font-semibold text-navy-900;
+  }
+}
+
+/* subtle scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

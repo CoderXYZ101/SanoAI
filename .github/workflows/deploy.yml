@@ -1,0 +1,38 @@
+# Deploys SanoAI to Firebase Hosting (+ Firestore rules) on every push to main.
+# Setup: see FIREBASE.md. Required GitHub secrets: FIREBASE_SERVICE_ACCOUNT, FIREBASE_PROJECT_ID.
+# The web app settings (public identifiers, not secrets) come from .env.production in the repository.
+name: Deploy to Firebase
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    # Opt in by adding the repository variable AUTO_DEPLOY=true (or run this workflow by hand).
+    if: ${{ vars.AUTO_DEPLOY == 'true' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run eval
+      - run: npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
+      # The service account also needs the "Firebase Rules Admin" role for this step.
+      - name: Deploy Firestore rules
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          PROJECT: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: |
+          printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx firebase deploy --only firestore:rules --project "$PROJECT"

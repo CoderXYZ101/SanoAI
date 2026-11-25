@@ -1,0 +1,134 @@
+rules_version = '2';
+// SanoAI is a browser-only app: these rules ARE the security boundary.
+// Every personal document carries user_id; a signed-in, EMAIL-VERIFIED user can only touch their own documents.
+// Administrators (documents in sano_admins, created only in the Firebase console) manage payments, codes and
+// enquiries. They get NO access to anyone's medical records.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/sano_admins/$(request.auth.uid)); }
+    function owns() { return signedIn() && resource.data.user_id == request.auth.uid; }
+    function ownsNew() { return signedIn() && request.resource.data.user_id == request.auth.uid; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+
+    // ── profile ──
+    // Users cannot change plan fields or the email (payments are matched to it). Report credits can only be spent.
+    // Plan changes come from: an admin approval, the payment webhook, or redeeming an unused sponsor code.
+    function planUnchanged() {
+      return request.resource.data.plan == resource.data.plan
+        && request.resource.data.get('plan_until', null) == resource.data.get('plan_until', null)
+        && request.resource.data.get('redeemed_code', null) == resource.data.get('redeemed_code', null);
+    }
+    function creditsNotAdded() {
+      return request.resource.data.get('report_credits', 0) == resource.data.get('report_credits', 0)
+        || (request.resource.data.get('report_credits', 0) == resource.data.get('report_credits', 0) - 1
+            && request.resource.data.get('report_credits', 0) >= 0);
+    }
+    function redeeming(uid) {
+      let code = request.resource.data.redeemed_code;
+      let path = /databases/$(database)/documents/sano_codes/$(code);
+      return code is string
+        && get(path).data.redeemed_by == null
+        && getAfter(path).data.redeemed_by == uid
+        && request.resource.data.plan == get(path).data.plan
+        && request.resource.data.plan_until == get(path).data.valid_until
+        && request.resource.data.get('report_credits', 0) == resource.data.get('report_credits', 0);
+    }
+    match /sano_users/{uid} {
+      allow get: if (signedIn() && uid == request.auth.uid) || isAdmin();
+      allow create: if signedIn() && uid == request.auth.uid
+                    && request.resource.data.user_id == request.auth.uid
+                    && request.resource.data.email == request.auth.token.email
+                    && request.resource.data.plan == 'free'
+                    && request.resource.data.get('plan_until', null) == null
+                    && request.resource.data.get('report_credits', 0) == 0;
+      allow update: if (signedIn() && uid == request.auth.uid
+                        && request.resource.data.user_id == request.auth.uid
+                        && request.resource.data.get('email', null) == resource.data.get('email', null)
+                        && !changed().hasAny(['last_payment_id'])
+                        && ((planUnchanged() && creditsNotAdded()) || redeeming(uid)))
+                    || (isAdmin() && changed().hasOnly(['plan', 'plan_until', 'report_credits', 'last_payment_id']));
+      allow delete: if signedIn() && uid == request.auth.uid;
+    }
+
+    // ── administrators: add yourself in the console (document id = your user UID) ──
+    match /sano_admins/{uid} {
+      allow get: if signedIn() && uid == request.auth.uid;
+    }
+
+    // ── manual payment claims ──
+    match /sano_payments/{claimId} {
+      allow get: if isAdmin() || (signedIn() && (resource == null || resource.data.user_id == request.auth.uid));
+      allow list: if isAdmin() || owns();
+      allow create: if ownsNew()
+                    && request.resource.data.id == claimId
+                    && request.resource.data.keys().hasOnly(['id', 'user_id', 'email', 'item', 'period', 'amount', 'method', 'reference', 'status', 'created_at'])
+                    && request.resource.data.email == request.auth.token.email
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.item in ['plus', 'pro', 'report']
+                    && request.resource.data.period in ['month', 'year']
+                    && request.resource.data.amount is number
+                    && request.resource.data.method in ['upi', 'razorpay', 'bank']
+                    && request.resource.data.created_at is string
+                    && request.resource.data.reference is string
+                    && request.resource.data.reference.matches('[A-Za-z0-9][A-Za-z0-9_-]{7,39}');
+      allow update: if isAdmin() && resource.data.status == 'pending'
+                    && request.resource.data.status in ['approved', 'rejected']
+                    && changed().hasOnly(['status', 'note', 'reviewed_at', 'reviewed_by']);
+      allow delete: if owns();
+    }
+    // one document per approved transaction reference; creating it twice is impossible (no updates allowed)
+    match /sano_payment_refs/{ref} {
+      allow get, create: if isAdmin();
+    }
+
+    // ── sponsor codes: admins create and list; a user may look up one code and claim it once ──
+    match /sano_codes/{code} {
+      allow get: if signedIn();
+      allow list, create: if isAdmin();
+      allow update: if signedIn() && resource.data.redeemed_by == null
+                    && request.resource.data.redeemed_by == request.auth.uid
+                    && changed().hasOnly(['redeemed_by', 'redeemed_at']);
+    }
+
+    // ── business enquiries: anyone may submit one (size-limited); only admins read them ──
+    match /sano_leads/{leadId} {
+      allow read: if isAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['id', 'org', 'type', 'name', 'contact', 'volume', 'message', 'created_at'])
+                    && request.resource.data.org is string && request.resource.data.org.size() <= 120
+                    && request.resource.data.name is string && request.resource.data.name.size() <= 80
+                    && request.resource.data.contact is string && request.resource.data.contact.size() <= 120
+                    && request.resource.data.message is string && request.resource.data.message.size() <= 1000
+                    && request.resource.data.type is string && request.resource.data.type.size() <= 40
+                    && request.resource.data.volume is string && request.resource.data.volume.size() <= 80
+                    && request.resource.data.created_at is string && request.resource.data.created_at.size() <= 40
+                    && request.resource.data.id == leadId;
+    }
+
+    // ── AI usage is written only by the managed-AI proxy, so quotas cannot be reset from the browser ──
+    match /sano_usage/{usageId} {
+      allow read: if signedIn() && (resource == null || owns());
+    }
+
+    // ── secure doctor links: anyone holding the long random id can READ that single document until it expires ──
+    match /sano_share_links/{linkId} {
+      allow get: if resource.data.revoked == false && resource.data.expires_ms > request.time.toMillis();
+      allow list: if owns();
+      allow create: if ownsNew();
+      allow update, delete: if owns();
+    }
+
+    // ── everything else: strictly owner-only ──
+    function ordinary(col) {
+      return col.matches('sano_.*') && !(col in ['sano_users', 'sano_admins', 'sano_payments', 'sano_payment_refs', 'sano_share_links', 'sano_codes', 'sano_leads', 'sano_usage']);
+    }
+    match /{col}/{docId} {
+      // resource == null lets the app test whether a document exists (e.g. a cached analysis) without a permission error
+      allow read: if ordinary(col) && signedIn() && (resource == null || owns());
+      allow create: if ordinary(col) && ownsNew();
+      allow update: if ordinary(col) && owns() && ownsNew();
+      allow delete: if ordinary(col) && owns();
+    }
+  }
+}
