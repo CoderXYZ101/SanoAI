@@ -106,9 +106,17 @@ service cloud.firestore {
                     && request.resource.data.id == leadId;
     }
 
-    // ── AI usage is written only by the managed-AI proxy, so quotas cannot be reset from the browser ──
+    // ── AI usage counter: the AI proxy adds 1 using the user's own token. It can only go UP by one and can never
+    //    be lowered or deleted, so an allowance cannot be reset from the browser ──
     match /sano_usage/{usageId} {
       allow read: if signedIn() && (resource == null || owns());
+      allow create: if ownsNew()
+                    && request.resource.data.month is string && request.resource.data.month.matches('[0-9]{4}-[0-9]{2}')
+                    && usageId == request.auth.uid + '_' + request.resource.data.month
+                    && request.resource.data.managed_ai == 1
+                    && request.resource.data.keys().hasOnly(['user_id', 'month', 'managed_ai']);
+      allow update: if owns() && changed().hasOnly(['managed_ai'])
+                    && request.resource.data.managed_ai == resource.data.managed_ai + 1;
     }
 
     // ── secure doctor links: anyone holding the long random id can READ that single document until it expires ──

@@ -1,7 +1,7 @@
 "use client";
 import { CheckCircle2, KeyRound, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
-import { resolveProviders } from "@/ai/providers";
+import { isThisComputer, resolveProviders } from "@/ai/providers";
 import { clearAiKeys, DEFAULT_MODELS, loadAiKeys, saveAiKeys, type AiKeys } from "@/lib/aiKeys";
 import { apiFetch } from "@/lib/client";
 import { Badge, Button, Callout, Card, Field, useToast } from "@/components/ui";
@@ -14,8 +14,11 @@ const CLOUD: { id: Cloud; label: string; hint: string; get: string }[] = [
   { id: "anthropic", label: "Anthropic Claude", hint: "Used last, only if nothing else works.", get: "console.anthropic.com" },
 ];
 
-/** Bring-your-own AI keys. Stored in THIS browser only (localStorage) and used to call the provider directly. */
-export default function AiKeysCard({ onSaved }: { onSaved?: () => void }) {
+/**
+ * Bring-your-own AI keys. Stored in THIS browser only (localStorage) and used to call the provider directly.
+ * `localOnly` (when SanoAI AI is set up) shows just the local-model fields.
+ */
+export default function AiKeysCard({ onSaved, localOnly = false }: { onSaved?: () => void; localOnly?: boolean }) {
   const [keys, setKeys] = useState<AiKeys>(() => loadAiKeys());
   const [test, setTest] = useState<Record<string, "ok" | "fail" | "busy" | undefined>>({});
   const [msg, setMsg] = useState<Record<string, string>>({});
@@ -23,10 +26,10 @@ export default function AiKeysCard({ onSaved }: { onSaved?: () => void }) {
 
   async function save() {
     saveAiKeys(keys);
-    const anyCloud = CLOUD.some((c) => keys[c.id].key.trim());
+    const anyCloud = !localOnly && CLOUD.some((c) => keys[c.id].key.trim());
     // Pasting your own key is your consent to call that provider; the toggle in Privacy can still switch it off.
     if (anyCloud) await apiFetch("/api/settings", { method: "PUT", json: { consentExternalAi: true } }).catch(() => {});
-    toast("AI keys saved in this browser.");
+    toast(localOnly ? "Local model saved in this browser." : "AI keys saved in this browser.");
     onSaved?.();
   }
 
@@ -54,12 +57,12 @@ export default function AiKeysCard({ onSaved }: { onSaved?: () => void }) {
       <div className="flex items-start gap-3">
         <KeyRound className="mt-0.5 h-5 w-5 text-sano-600" />
         <div>
-          <h3 className="text-[15px] font-semibold text-navy-900">Your AI keys</h3>
-          <p className="mt-0.5 text-[13px] leading-relaxed text-navy-500">Optional. SanoAI works fully offline without them. Keys stay in this browser only — they are never uploaded to SanoAI or Firestore. They are tried in the order below; if one fails, the next is used.</p>
+          <h3 className="text-[15px] font-semibold text-navy-900">{localOnly ? "Use a model on this computer" : "Your AI keys"}</h3>
+          <p className="mt-0.5 text-[13px] leading-relaxed text-navy-500">{localOnly ? "Optional, for people who run Ollama. When set, it is tried before SanoAI AI. Leave the model empty to turn it off." : "Optional. SanoAI works fully offline without them. Keys stay in this browser only — they are never uploaded to SanoAI or Firestore. They are tried in the order below; if one fails, the next is used."}</p>
         </div>
       </div>
       <div className="space-y-4">
-        {CLOUD.map((c) => (
+        {!localOnly && CLOUD.map((c) => (
           <div key={c.id} className="rounded-xl border border-navy-100 p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[14px] font-semibold text-navy-800">{c.label}</p>
@@ -83,7 +86,7 @@ export default function AiKeysCard({ onSaved }: { onSaved?: () => void }) {
         <div className="rounded-xl border border-navy-100 p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-[14px] font-semibold text-navy-800">Local model (Ollama)</p>
-            <Badge tone="green">stays on your computer</Badge>
+            {isThisComputer(keys.ollama.baseUrl) ? <Badge tone="green">stays on your computer</Badge> : <Badge tone="amber">another computer · needs consent</Badge>}
           </div>
           <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_1.4fr_auto]">
             <input aria-label="Ollama model" className="field" placeholder="e.g. qwen2.5:7b" value={keys.ollama.model} onChange={(e) => setKeys({ ...keys, ollama: { ...keys.ollama, model: e.target.value.trim() } })} />
@@ -96,12 +99,12 @@ export default function AiKeysCard({ onSaved }: { onSaved?: () => void }) {
           <p className="mt-1.5 text-[12px] text-navy-400">Requires Ollama running with browser access allowed (set OLLAMA_ORIGINS to this site).</p>
         </div>
       </div>
-      <Callout tone="info">Anyone with access to this browser profile could read saved keys. On shared computers, use “Remove all keys” when you finish.</Callout>
+      {!localOnly && <Callout tone="info">Anyone with access to this browser profile could read saved keys. On shared computers, use “Remove all keys” when you finish.</Callout>}
       <div className="flex flex-wrap justify-between gap-2">
-        <Button variant="ghost" className="text-rose-600 hover:bg-rose-50" icon={<Trash2 className="h-4 w-4" />} onClick={() => { clearAiKeys(); setKeys(loadAiKeys()); setTest({}); setMsg({}); toast("All AI keys removed from this browser."); onSaved?.(); }}>
-          Remove all keys
+        <Button variant="ghost" className="text-rose-600 hover:bg-rose-50" icon={<Trash2 className="h-4 w-4" />} onClick={() => { clearAiKeys(); setKeys(loadAiKeys()); setTest({}); setMsg({}); toast(localOnly ? "Local model removed." : "All AI keys removed from this browser."); onSaved?.(); }}>
+          {localOnly ? "Remove local model" : "Remove all keys"}
         </Button>
-        <Button onClick={save}>Save keys</Button>
+        <Button onClick={save}>{localOnly ? "Save" : "Save keys"}</Button>
       </div>
     </Card>
   );

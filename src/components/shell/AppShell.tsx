@@ -130,12 +130,12 @@ export default function AppShell({ user, ai, isAdmin, children }: ShellProps) {
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-1">
             <span className={clsx("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-medium ring-1 ring-inset", ai.effective === "live" ? "bg-sano-50 text-sano-800 ring-sano-200" : "bg-amber-50 text-amber-800 ring-amber-200")}>
               <span className={clsx("h-1.5 w-1.5 rounded-full", ai.effective === "live" ? "bg-sano-500" : "bg-amber-500")} />
-              {ai.effective === "live" ? `Live AI · ${ai.label}` : "Offline mode · built-in engines, no AI key"}
+              {ai.effective === "live" ? `Live AI · ${ai.label}` : "Built-in rules · no AI in use"}
             </span>
             <span className="text-navy-400">SanoAI shares information, not medical advice — it cannot diagnose or replace a clinician.</span>
             {ai.effective === "demo" && (
-              <Link href="/settings#keys" className="font-medium text-sano-700 hover:underline">
-                Add an AI key
+              <Link href="/settings#ai" className="font-medium text-sano-700 hover:underline">
+                AI settings
               </Link>
             )}
           </div>

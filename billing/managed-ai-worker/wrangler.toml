@@ -1,0 +1,14 @@
+# SanoAI AI proxy. Deploy:  npx wrangler deploy --config billing/managed-ai-worker/wrangler.toml
+# The Claude key is NOT written here. Add it with:
+#   npx wrangler secret put ANTHROPIC_API_KEY --config billing/managed-ai-worker/wrangler.toml
+name = "sanoai-ai"
+main = "index.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+# Public settings only
+[vars]
+FIREBASE_PROJECT_ID = "sanoai-india"
+ALLOWED_ORIGIN = "https://sanoai-india.web.app,https://sanoai-india.firebaseapp.com"
+ANTHROPIC_MODEL = "claude-opus-5-5"   # much cheaper alternative: "claude-haiku-5-5"
+ANTHROPIC_EFFORT = "medium"           # "low" is cheaper and faster

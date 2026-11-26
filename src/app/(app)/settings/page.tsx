@@ -5,11 +5,13 @@ import { useState } from "react";
 import type { EvalResult } from "@/ai/eval";
 import { Badge, Button, Callout, Card, ErrorState, Field, LoadingBlock, Modal, PageHeader, SectionTitle, Segmented, Toggle, useToast } from "@/components/ui";
 import AiKeysCard from "@/components/AiKeysCard";
+import { AiOptions } from "@/components/AiChoice";
+import { managedAiUrl } from "@/lib/aiKeys";
 import { deleteCurrentAccount, useAuth } from "@/lib/auth";
 import { apiFetch, downloadFile, useApi } from "@/lib/client";
 
 interface Settings { consentExternalAi: boolean; consentChatMemory: boolean; readingLevel: "plain" | "detailed"; language: string }
-interface Ai { provider: { id: string; label: string; model: string | null; configured: boolean }; chain?: { id: string; label: string; model: string | null; external: boolean }[]; consent: boolean; effective: "live" | "demo"; reason: string }
+interface Ai { provider: { id: string; label: string; model: string | null; configured: boolean }; chain?: { id: string; label: string; model: string | null; external: boolean }[]; consent: boolean; effective: "live" | "demo"; reason: string; allowance?: { used: number; limit: number } }
 interface Status { ai: { provider: string; label: string; model: string | null; configured: boolean; consent: boolean; effective: string; reason: string }; integrations: Record<string, { configured: boolean; implemented: boolean; note: string }>; security: { secretsConfigured: boolean; note: string } }
 interface Audit { entries: { id: string; module: string; provider: string; mode: string; sentToExternalService: boolean; consentGiven: boolean; payloadKB: number; outcome: string; detail: string | null; at: string }[] }
 
@@ -34,7 +36,7 @@ export default function SettingsPage() {
       s.setData(r);
       audit.reload();
       toast("Saved.");
-      router.refresh(); // refresh the AI-mode bar
+      window.dispatchEvent(new Event("sano:ai")); // refresh the AI-mode bar
     } catch (e) {
       toast((e as Error).message, "err");
     }
@@ -51,6 +53,20 @@ export default function SettingsPage() {
     <div className="space-y-8">
       <PageHeader eyebrow="Settings" title="Privacy, AI and your data" description="You decide what SanoAI may do with your information — and you can see everything it has done." />
 
+      {managedAiUrl() ? (
+        <section id="ai" className="scroll-mt-24">
+          <SectionTitle title="How SanoAI answers" />
+          <Card className="card-pad space-y-4">
+            <AiOptions value={settings.consentExternalAi} onChoose={(v) => update({ consentExternalAi: v })} />
+            <p className="text-[14px] leading-relaxed text-navy-600">{ai.reason}</p>
+          </Card>
+          <details className="mt-3">
+            <summary className="cursor-pointer text-[13px] font-medium text-sano-700">Advanced: use Ollama on this computer</summary>
+            <div className="mt-3"><AiKeysCard localOnly onSaved={() => { s.reload(); window.dispatchEvent(new Event("sano:ai")); }} /></div>
+          </details>
+        </section>
+      ) : (
+      <>
       <section id="ai" className="scroll-mt-24">
         <SectionTitle title="AI mode" />
         <Card className="card-pad space-y-4">
@@ -67,20 +83,22 @@ export default function SettingsPage() {
               <li>{ai.chain.length + 1}. <strong>Built-in rule-based engines</strong> <Badge tone="green">offline · always available</Badge></li>
             </ol>
           )}
-          {!ai.provider.configured && <Callout tone="info" title="Running without an AI key is fully supported">Timeline extraction, blind-spot detection, cross-specialty links, biomarker analysis and the assistant all work through deterministic, source-linked engines. Add <code>ANTHROPIC_API_KEY</code> to <code>.env.local</code> to enable AI-written explanations and scanned-document reading.</Callout>}
+          {!ai.provider.configured && <Callout tone="info" title="Running without an AI key is fully supported">Timeline extraction, blind-spot detection, cross-specialty links, biomarker analysis and the assistant all work through deterministic, source-linked engines. Add your own key below to enable AI-written explanations and scanned-document reading.</Callout>}
         </Card>
       </section>
 
       <section id="keys" className="scroll-mt-24">
-        <SectionTitle title="AI keys & plan" hint="Offline by default. Add your own key, or upgrade for managed AI." />
-        <AiKeysCard onSaved={() => { s.reload(); router.refresh(); }} />
+        <SectionTitle title="AI keys" hint="Offline by default. Add your own key to turn on AI." />
+        <AiKeysCard onSaved={() => { s.reload(); window.dispatchEvent(new Event("sano:ai")); }} />
       </section>
+      </>
+      )}
 
       <section id="privacy" className="scroll-mt-24">
         <SectionTitle title="Privacy & consent" />
         <Card className="card-pad space-y-6">
-          <Toggle checked={settings.consentExternalAi} onChange={(v) => update({ consentExternalAi: v })} label="Allow sending my information to an external AI service" description="Off by default. When on, the text of your questions and (for AI-assisted modules) your extracted records can be sent to the configured provider. Every call is logged below. Turn off to use rule-based engines only." disabled={!ai.provider.configured} />
-          {!ai.provider.configured && <p className="-mt-4 text-[12.5px] text-navy-400">No external AI provider is configured, so nothing can be sent anywhere.</p>}
+          {!managedAiUrl() && <Toggle checked={settings.consentExternalAi} onChange={(v) => update({ consentExternalAi: v })} label="Allow sending my information to an external AI service" description="Off by default. When on, the text of your questions and (for AI-assisted modules) your extracted records can be sent to the configured provider. Every call is logged below. Turn off to use rule-based engines only." disabled={!ai.provider.configured} />}
+          {!managedAiUrl() && !ai.provider.configured && <p className="-mt-4 text-[12.5px] text-navy-400">No external AI provider is configured, so nothing can be sent anywhere.</p>}
           <Toggle checked={settings.consentChatMemory} onChange={(v) => update({ consentChatMemory: v })} label="Let the assistant and modules use my records as context" description="Lets answers refer to your documents and health profile so you don't have to repeat yourself. Records stay inside your account either way." />
         </Card>
       </section>

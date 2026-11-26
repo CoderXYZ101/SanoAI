@@ -14,6 +14,13 @@ const STOP = new Set(
   ),
 );
 
+/**
+ * Words found in many health questions that say nothing about the topic. Matching only these is NOT relevance
+ * (otherwise "too much oily food" matches vitamin D, because that entry mentions oily fish and "too much").
+ */
+const GENERIC_WORDS =
+  "side effect much many too more less eat eating food foods drink drinking high low normal level levels cause causes symptom symptoms sign signs test tests result results report read reading health healthy body day daily get getting feel feeling make take taking help tell know thing bad good risk problem happen long time often blood pain disease chronic function condition treatment doctor vitamin persistent fast energy study example";
+
 export function tokenize(s: string): string[] {
   return s
     .toLowerCase()
@@ -33,7 +40,15 @@ interface Doc {
   entry: KbEntry;
   tf: Map<string, number>;
   len: number;
+  /** Topic words: from the title and one-word aliases. */
+  anchors: Set<string>;
+  /** Aliases matched as whole phrases. */
+  phrases: RegExp[];
 }
+
+let generic: Set<string> | null = null;
+const isGeneric = (token: string) => (generic ??= new Set(tokenize(GENERIC_WORDS))).has(token);
+const phrase = (alias: string) => new RegExp(`(^|[^a-z0-9])${alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}s?($|[^a-z0-9])`);
 
 function build(): { docs: Doc[]; df: Map<string, number>; avg: number } {
   const docs: Doc[] = KB.map((entry) => {
@@ -50,7 +65,11 @@ function build(): { docs: Doc[]; df: Map<string, number>; avg: number } {
     add(entry.redFlags.join(" "), 1);
     const tf = new Map<string, number>();
     weighted.forEach((t) => tf.set(t, (tf.get(t) ?? 0) + 1));
-    return { entry, tf, len: weighted.length };
+    const single = entry.aliases.filter((a) => !a.includes(" "));
+    const anchors = new Set(tokenize([entry.title, ...single].join(" ")).filter((t) => !isGeneric(t)));
+    // a one-word alias that is a generic word ("high", "low") never identifies a topic by itself
+    const phrases = entry.aliases.filter((a) => a.includes(" ") || tokenize(a).some((t) => !isGeneric(t))).map(phrase);
+    return { entry, tf, len: weighted.length, anchors, phrases };
   });
   const df = new Map<string, number>();
   docs.forEach((d) => d.tf.forEach((_, t) => df.set(t, (df.get(t) ?? 0) + 1)));
@@ -84,8 +103,10 @@ export function retrieve(query: string, k = 4, minScore = 1.2): Retrieved[] {
       score += idf * ((f * (k1 + 1)) / (f + k1 * (1 - b + (b * d.len) / avg)));
     }
     // Exact alias phrase boost
-    for (const a of d.entry.aliases) if (a.length > 3 && lowerQuery.includes(a)) score += 3;
-    return { entry: d.entry, score, sources: sourcesFor(d.entry.sourceIds) };
+    const named = d.phrases.filter((re) => re.test(lowerQuery)).length;
+    score += 3 * named;
+    const onTopic = named > 0 || q.some((t) => d.anchors.has(t));
+    return { entry: d.entry, score: onTopic ? score : 0, sources: sourcesFor(d.entry.sourceIds) };
   });
   return scored
     .filter((s) => s.score >= minScore)

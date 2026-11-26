@@ -34,6 +34,7 @@ const MODULES: { re: RegExp; href: string; label: string }[] = [
 
 const RECORD_Q = /\b(my|mine)\b.*\b(result|report|test|record|medication|medicine|history|level|value|blood|document)s?\b|\bsummari[sz]e\b|\bwhat (do|does) my\b|\bin my (records|reports)\b/i;
 const SUMMARISE = /\b(summari[sz]e|summary|overview|what('s| is) in)\b.*\b(my|the)\b.*\b(records?|reports?|history|documents?|timeline)\b|\bsummari[sz]e (my|the)\b/i;
+const DEFINITION_Q = /^\s*(what is|what's|what are|what does|tell me about|explain)\b/i;
 const CONSULT_BRIEF = /\b(prepare|prep|brief|summary).*(consult|appointment|visit|doctor)|consultation (summary|brief)/i;
 
 export function recordBrief(events: HealthEvent[], profile?: HealthProfile, docs: DocumentDTO[] = []): string {
@@ -157,8 +158,8 @@ export async function chatTurn(inp: ChatInput): Promise<{ content: string; meta:
   // Live model answer (if consented + configured), with validation and graceful fallback
   const passages = hits.map((h) => ({ topic: h.entry.title, sourceNumbers: byEntry.get(h.entry.id), summary: h.entry.summary, facts: h.entry.facts.map((f) => `[${f.status}] ${f.text}`), causes: h.entry.causes, redFlags: h.entry.redFlags, whenToSeek: h.entry.whenToSeek }));
   const brief = hasRecords ? recordBrief(inp.events, inp.profile, inp.docs) : "";
-  // Economy mode: a strong match in the cited library is answered by the rule-based composer — no tokens spent.
-  const strong = true && hits.length > 0 && hits[0].score >= 9 && inp.language === "English" && !RECORD_Q.test(message) && message.split(/\s+/).length <= 14;
+  // Economy mode: only a short "what is X" question that the cited library clearly covers is answered without AI.
+  const strong = hits.length > 0 && hits[0].score >= 9 && DEFINITION_Q.test(message) && inp.language === "English" && !RECORD_Q.test(message) && message.split(/\s+/).length <= 8;
   const r = strong
     ? ({ ok: false, meta: { mode: "rules", provider: "SanoAI cited library (economy mode — no AI tokens used)" } } as const)
     : await runStructured({

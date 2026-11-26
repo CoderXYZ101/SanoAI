@@ -1,18 +1,19 @@
 import { z } from "zod";
 import { ApiError, authed, parseBody } from "@/client/http";
 import { managedAiUrl } from "@/lib/aiKeys";
-import { checkoutLink, demoBilling, getEntitlements, getUsage, PLANS, reportCredits } from "@/lib/billing";
+import { aiAllowance, checkoutLink, demoBilling, getEntitlements, PLANS, reportCredits } from "@/lib/billing";
 import { getUser, updateUserProfile } from "@/lib/repo";
 
 export const GET = authed(async (_req, { user }) => {
   const ent = await getEntitlements(user.id);
   const row = await getUser(user.id);
+  const ai = await aiAllowance(user.id);
   const flags = (period: "month" | "year") => ({ plus: Boolean(checkoutLink("plus", period)), pro: Boolean(checkoutLink("pro", period)) });
   return {
     plan: ent.plan,
     planUntil: row?.plan_until ?? null,
-    limits: ent.limits,
-    usage: await getUsage(user.id),
+    limits: { ...ent.limits, managedAiCalls: ai.limit },
+    usage: { managedAi: ai.used },
     plans: PLANS,
     credits: await reportCredits(user.id),
     demoBilling: demoBilling(),

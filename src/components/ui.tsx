@@ -209,7 +209,7 @@ export function AiModeChip({ meta, className }: { meta?: AiMeta; className?: str
       ? { tone: "teal" as Tone, text: `AI-assisted · ${meta.provider}${meta.model ? ` · ${meta.model}` : ""}`, dot: "bg-sano-500" }
       : meta.mode === "rules"
         ? { tone: "sky" as Tone, text: "Curated library · deterministic", dot: "bg-sky-500" }
-        : { tone: "amber" as Tone, text: "Offline mode · built-in engines, no AI key", dot: "bg-amber-500" };
+        : { tone: "amber" as Tone, text: "Built-in rules · no AI used", dot: "bg-amber-500" };
   return (
     <span className={className}>
       <Badge tone={cfg.tone} icon={<span className={clsx("h-1.5 w-1.5 rounded-full", cfg.dot)} />}>

@@ -2,9 +2,9 @@
 
 | Plan | Price (placeholder, add GST as applicable) | Includes |
 |---|---|---|
-| Free | ₹0 | 5 documents, all analysis engines, bring-your-own AI key, 1 doctor link, 30-day diary |
-| Sano Plus | ₹199 / month | 150 managed AI answers, 50 documents, 5 doctor links, 1-year diary |
-| Sano Pro | ₹499 / month | 600 managed AI answers, 500 documents, 25 doctor links, unlimited diary |
+| Free | ₹0 | 5 documents, all analysis engines, 100 SanoAI AI requests / month, 1 doctor link, 30-day diary |
+| Sano Plus | ₹199 / month | 500 AI requests, 50 documents, 5 doctor links, 1-year diary |
+| Sano Pro | ₹499 / month | 1,500 AI requests, 500 documents, 25 doctor links, unlimited diary |
 | Yearly Plus / Pro | ₹1,999 / ₹4,999 | two months free |
 | Premium Doctor Report | ₹99 once | trends, cross-specialty links, diary averages (included in paid plans) |
 | Labs / clinics / employers | ₹5–15 per report, from ₹3,000 / month, ₹50–100 per employee | `/business` page with calculator and enquiry form |
@@ -27,11 +27,11 @@ Approval gives 31 or 366 days of the plan (renewing the same plan extends it), o
 2. Create two **Payment Pages** (Plus ₹199, Pro ₹499) and put their URLs in `NEXT_PUBLIC_RAZORPAY_LINK_PLUS` / `_PRO`.
 3. Deploy `billing/razorpay-webhook-worker` to Cloudflare Workers (free) with secrets `RAZORPAY_WEBHOOK_SECRET`, `GCP_SERVICE_ACCOUNT` and vars `FIREBASE_PROJECT_ID`, `PRICE_PLUS_PAISE=19900`, `PRICE_PRO_PAISE=49900`.
 4. Razorpay dashboard → Webhooks → add the worker URL, event `payment.captured`.
-5. Optional managed AI: deploy `billing/managed-ai-worker` (secrets `GEMINI_API_KEY`, `GCP_SERVICE_ACCOUNT`) and set `NEXT_PUBLIC_MANAGED_AI_URL`.
+5. SanoAI AI for every plan: see **AI-SETUP.md**.
 
 Payments are one-time for 31 days of access (no auto-renewal yet; use Razorpay Subscriptions for that).
 
-> Both workers are templates and have **not been run against live Razorpay or Google**. The buyer is matched by email, which is why accounts must verify their email and cannot change the profile email.
+> The payment webhook worker is a template that has **not been run against live Razorpay**. The buyer is matched by email, which is why accounts must verify their email and cannot change the profile email.
 
 ## Other revenue ideas
 Diagnostic-lab partnerships (report explanation for their patients), clinic pilots, pharmacy referrals, employer wellness packs.
@@ -42,4 +42,4 @@ Diagnostic-lab partnerships (report explanation for their patients), clinic pilo
 - **Business enquiries** appear on **Admin → Enquiries**. The form is public and has no spam protection yet (Firebase App Check is not built in, so do not switch on enforcement).
 
 ## What is enforced where
-Plan, expiry and paid report credits cannot be raised by ordinary users (Firestore rules); only admins, the webhook and sponsor codes change them. Managed-AI usage is writable only by the proxy. Feature limits themselves run in the app, so a determined user could bypass them.
+Plan, expiry and paid report credits cannot be raised by ordinary users (Firestore rules); only admins, the webhook and sponsor codes change them. The AI usage counter can only go up, so it cannot be reset from the browser. Feature limits themselves run in the app, so a determined user could bypass them.

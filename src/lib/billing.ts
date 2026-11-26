@@ -18,7 +18,7 @@ export type PlanId = "free" | "plus" | "pro";
 
 export interface PlanLimits {
   documents: number; // stored documents
-  managedAiCalls: number; // per month, through SanoAI's own AI keys
+  managedAiCalls: number; // per month, through SanoAI's AI proxy. KEEP IN SYNC with billing/managed-ai-worker
   conversations: number; // saved assistant conversations (-1 = unlimited)
   shareLinks: number; // active doctor share links
   logDays: number; // health-diary history kept visible (-1 = unlimited)
@@ -43,8 +43,8 @@ export const PLANS: PlanDef[] = [
     price: "₹0",
     period: "forever",
     tagline: "Understand your records, fully offline-capable.",
-    limits: { documents: 5, managedAiCalls: 0, conversations: 10, shareLinks: 1, logDays: 30 },
-    features: ["Up to 5 documents", "Timeline, blind-spot, uncertainty & cross-specialty engines", "Deficiency finder & simulator", "Bring your own AI key (optional)", "1 secure doctor link", "30-day health diary"],
+    limits: { documents: 5, managedAiCalls: 100, conversations: 10, shareLinks: 1, logDays: 30 },
+    features: ["Up to 5 documents", "Timeline, blind-spot, uncertainty & cross-specialty engines", "Deficiency finder & simulator", "100 SanoAI AI answers / month, no key needed", "1 secure doctor link", "30-day health diary"],
   },
   {
     id: "plus",
@@ -52,10 +52,10 @@ export const PLANS: PlanDef[] = [
     price: "₹199",
     yearPrice: "₹1,999",
     period: "per month",
-    tagline: "AI-written explanations, no key needed.",
+    tagline: "More AI answers and more room.",
     highlight: true,
-    limits: { documents: 50, managedAiCalls: 150, conversations: -1, shareLinks: 5, logDays: 365 },
-    features: ["Everything in Free", "150 managed AI answers / month", "Up to 50 documents", "Unlimited saved conversations", "5 secure doctor links", "1-year health diary & trends", "Clean, unbranded doctor brief"],
+    limits: { documents: 50, managedAiCalls: 500, conversations: -1, shareLinks: 5, logDays: 365 },
+    features: ["Everything in Free", "500 AI answers / month", "Up to 50 documents", "Unlimited saved conversations", "5 secure doctor links", "1-year health diary & trends", "Clean, unbranded doctor brief"],
   },
   {
     id: "pro",
@@ -64,8 +64,8 @@ export const PLANS: PlanDef[] = [
     yearPrice: "₹4,999",
     period: "per month",
     tagline: "For people managing complex or long-term care.",
-    limits: { documents: 500, managedAiCalls: 600, conversations: -1, shareLinks: 25, logDays: -1 },
-    features: ["Everything in Plus", "600 managed AI answers / month", "Up to 500 documents", "25 secure doctor links", "Unlimited diary history", "Priority access to new modules"],
+    limits: { documents: 500, managedAiCalls: 1500, conversations: -1, shareLinks: 25, logDays: -1 },
+    features: ["Everything in Plus", "1,500 AI answers / month", "Up to 500 documents", "25 secure doctor links", "Unlimited diary history", "Priority access to new modules"],
   },
 ];
 export const PLAN_BY_ID = Object.fromEntries(PLANS.map((p) => [p.id, p])) as Record<PlanId, PlanDef>;
@@ -117,11 +117,13 @@ export async function getUsage(userId: string): Promise<{ managedAi: number }> {
   const r = await store.get("usage", usageId(userId));
   return { managedAi: Number(r?.managed_ai ?? 0) };
 }
-// Usage is READ-ONLY for clients: only the managed-AI proxy (admin credentials) increments it.
-export async function managedCallsLeft(userId: string): Promise<number> {
-  const { limits } = await getEntitlements(userId);
-  if (limits.managedAiCalls <= 0) return 0;
-  return Math.max(0, limits.managedAiCalls - (await getUsage(userId)).managedAi);
+// Only the AI proxy counts usage. The proxy honours real plans only (never demo plans), so the app does the same.
+export async function aiAllowance(userId: string): Promise<{ used: number; limit: number; left: number }> {
+  const u = await getUser(userId).catch(() => undefined);
+  const active = u && (u.plan === "plus" || u.plan === "pro") && !(u.plan_until && new Date(u.plan_until).getTime() < Date.now());
+  const limit = PLAN_BY_ID[active ? u.plan : "free"].limits.managedAiCalls;
+  const used = (await getUsage(userId)).managedAi;
+  return { used: Math.min(used, limit), limit, left: Math.max(0, limit - used) };
 }
 
 /** Throws a user-facing error when a plan limit would be exceeded. */

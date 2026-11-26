@@ -39,6 +39,7 @@ The service account needs the roles **Firebase Hosting Admin** and **Firebase Ru
 ```bash
 npm run emulators                       # terminal 1 (Auth + Firestore; needs Java 21+)
 npm run test:rules                      # security rules + payment approval checks (emulators running)
+npm run test:ai                         # AI proxy checks with simulated providers (emulators running)
 NEXT_PUBLIC_USE_EMULATORS=true NEXT_PUBLIC_DEMO_BILLING=true npm run dev   # terminal 2 → http://localhost:3000
 ```
 

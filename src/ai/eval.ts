@@ -143,6 +143,21 @@ export async function runEvals(): Promise<EvalResult[]> {
   await t("Retrieval (RAG)", "'low ferritin' → iron deficiency entry", () => retrieve("my ferritin is low")[0]?.entry.id === "iron-deficiency");
   await t("Retrieval (RAG)", "'high tsh' → thyroid entry", () => retrieve("high tsh result")[0]?.entry.id === "hypothyroidism");
   await t("Retrieval (RAG)", "off-topic query returns nothing", () => retrieve("how do I fly a helicopter").length === 0);
+  const top = (q: string) => retrieve(q, 3).map((h) => h.entry.id);
+  const first = (q: string, id: string) => () => top(q)[0] === id || `got: ${top(q).join(", ") || "nothing"}`;
+  await t("Retrieval (RAG)", "oily food question is about fats, never vitamin D", () => {
+    const ids = top("what are the side effects of eating too much oily food");
+    return (ids[0] === "dietary-fats" && !ids.includes("vitamin-d")) || ids.join(", ");
+  });
+  await t("Retrieval (RAG)", "'fast food' is not a heartbeat question", () => {
+    const ids = top("is fast food bad for me");
+    return (ids[0] === "dietary-fats" && !ids.includes("palpitations")) || ids.join(", ");
+  });
+  await t("Retrieval (RAG)", "'not drinking water' → dehydration, not alcohol", first("side effects of not drinking water", "dehydration"));
+  await t("Retrieval (RAG)", "a new cough → common cold, not tuberculosis", first("I have had a cough since yesterday", "common-cold"));
+  await t("Retrieval (RAG)", "a persistent cough also raises tuberculosis", () => top("persistent cough for three weeks").includes("tuberculosis"));
+  await t("Retrieval (RAG)", "fever question → fever", first("what should I do about a fever", "fever"));
+  await t("Retrieval (RAG)", "generic words alone match nothing", () => retrieve("what are the side effects of too much screen time").length === 0);
   await t("Retrieval (RAG)", "every knowledge-base entry cites existing sources", () => {
     const bad = KB.filter((e) => !e.sourceIds.length || e.sourceIds.some((s) => !SOURCE_BY_ID.has(s))).map((e) => e.id);
     return bad.length === 0 ? true : bad.join(", ");

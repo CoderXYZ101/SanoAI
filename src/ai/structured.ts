@@ -3,7 +3,7 @@ import { DEMO_INFO, resolveProviders, toInfo, type ProviderInfo } from "./provid
 import { ProviderError, type Attachment, type LlmProvider } from "./providers/types";
 import { guardValue } from "./safety";
 import type { AiMeta } from "./types";
-import { getPlan, managedCallsLeft } from "@/lib/billing";
+import { aiAllowance } from "@/lib/billing";
 import { managedAiUrl } from "@/lib/aiKeys";
 import { getSettings, logAudit } from "@/lib/repo";
 
@@ -26,12 +26,13 @@ export interface AiStatus {
   consent: boolean;
   effective: "live" | "demo";
   reason: string;
+  /** Present when SanoAI AI is set up: this month's requests. */
+  allowance?: { used: number; limit: number };
 }
 
 async function chainFor(userId: string) {
-  const plan = await getPlan(userId);
-  const managedOk = plan !== "free" && Boolean(managedAiUrl()) && (await managedCallsLeft(userId)) > 0;
-  return { plan, all: resolveProviders({ managedAllowed: managedOk }) };
+  const allowance = managedAiUrl() ? await aiAllowance(userId) : undefined;
+  return { allowance, all: resolveProviders({ managedAllowed: Boolean(allowance && allowance.left > 0) }) };
 }
 async function usableProviders(userId: string, consent: boolean): Promise<LlmProvider[]> {
   const { all } = await chainFor(userId);
@@ -39,9 +40,20 @@ async function usableProviders(userId: string, consent: boolean): Promise<LlmPro
 }
 
 export async function aiStatus(userId: string): Promise<AiStatus> {
-  const { all } = await chainFor(userId);
+  const { all, allowance } = await chainFor(userId);
   const consent = (await getSettings(userId)).consentExternalAi;
   const chain = all.map(toInfo);
+  // with a local model set up, the general chain description below applies
+  if (allowance && !all.some((p) => p.id === "ollama")) {
+    const sanoAi: ProviderInfo = { id: "managed", label: "SanoAI AI", model: null, configured: true, external: true };
+    const live = consent && allowance.left > 0;
+    const reason = !consent
+      ? "You chose built-in rules. Nothing is sent to an AI service."
+      : live
+        ? `SanoAI AI is on: ${allowance.left} of ${allowance.limit} requests left this month. Built-in rules take over if it is unavailable.`
+        : `You have used all ${allowance.limit} AI requests for this month, so built-in rules are being used until next month.`;
+    return { provider: sanoAi, chain, consent, effective: live ? "live" : "demo", reason, allowance };
+  }
   if (!all.length) {
     return { provider: DEMO_INFO, chain, consent, effective: "demo", reason: "No AI key is set, so SanoAI is running its built-in engines — fully offline and private. Add your own key in Settings → AI keys (kept only in this browser), or upgrade for managed AI." };
   }
@@ -52,12 +64,12 @@ export async function aiStatus(userId: string): Promise<AiStatus> {
       chain,
       consent,
       effective: "demo",
-      reason: `${all[0].label} is configured, but you have not consented to sending your information to an external AI service (Settings → Privacy). Built-in engines are being used instead. A local model (Ollama) needs no consent.`,
+      reason: `${all[0].label} is configured, but you have not allowed sending your information to an external AI service (see Settings). Built-in engines are being used instead. A model on this computer needs no consent.`,
     };
   }
   const p = usable[0];
   const names = usable.map((u) => `${u.label}${u.external ? "" : " — local, offline"}`);
-  return { provider: toInfo(p), chain, consent, effective: "live", reason: `Live analysis: ${names.join(" → ")} → rule-based engine as the final fallback.` };
+  return { provider: toInfo(p), chain, consent, effective: "live", allowance, reason: `Live analysis: ${names.join(" → ")} → rule-based engine as the final fallback.` };
 }
 
 export async function demoMeta(userId: string, extraNotice?: string): Promise<AiMeta> {

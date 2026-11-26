@@ -5,7 +5,7 @@
 A Generative-AI healthcare intelligence platform that reconstructs your medical history from your own documents, shows what the records **don't** say, communicates uncertainty explicitly, links findings across specialties on an interactive 3D body map, and helps you talk to clinicians. It is an information tool — it cannot diagnose, treat or prescribe.
 
 ## Architecture (free, no server)
-`GitHub (code) → Firebase Hosting (static app) + Firebase Auth + Cloud Firestore`. All analysis engines run **in the browser**; Firestore security rules are the security boundary. AI is optional: offline built-in engines by default, users can add their own key (stored only in their browser), paid plans can use managed AI through a proxy. See **FIREBASE.md** (deploy) and **BILLING.md** (plans).
+`GitHub (code) → Firebase Hosting (static app) + Firebase Auth + Cloud Firestore`. All analysis engines run **in the browser**; Firestore security rules are the security boundary. AI is optional: with the proxy set up, users choose **SanoAI AI** (the owner's key, never visible to them) or **Built-in rules**; a local Ollama model is also supported. See **FIREBASE.md** (deploy), **AI-SETUP.md** (AI) and **BILLING.md** (plans).
 
 ## Run it
 ```bash
@@ -14,7 +14,7 @@ cp .env.example .env.local        # Firebase web config, or use emulators
 npm run emulators                 # terminal 1 (Auth + Firestore)
 NEXT_PUBLIC_USE_EMULATORS=true NEXT_PUBLIC_DEMO_BILLING=true npm run dev   # terminal 2
 ```
-Register, verify the email (with emulators, open the link printed in the emulator terminal), then **Load synthetic demo records**. `npm run eval` runs 64 offline checks of every AI engine; `npm run test:rules` checks the security rules against the running emulators.
+Register, verify the email (with emulators, open the link printed in the emulator terminal), then **Load synthetic demo records**. `npm run eval` runs 71 offline checks of the AI engines; `npm run test:rules` and `npm run test:ai` check the security rules and the AI proxy against the running emulators.
 
 ## Features
 Medical Timeline reconstruction (source-linked, uncertain dates flagged) · Blind-Spot Detector · Uncertainty Engine · Cross-Specialty map (3D) · Counterfactual Simulator (educational) · Deficiency Finder · AI Health Assistant with citations, voice and safety triage · **Health Diary** with trends · **Secure doctor links** (expiring, revocable) · Doctor Brief · Pharmacy tools · Free/Plus/Pro plans · AI transparency ledger · data export and account deletion · Google sign-in and email verification · UPI payment claims with an admin approval page.

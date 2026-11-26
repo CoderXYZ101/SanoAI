@@ -51,12 +51,15 @@ export async function updateUserProfile(id: string, patch: { name?: string; demo
 // ───────────────────────── settings ─────────────────────────
 export interface Settings {
   consentExternalAi: boolean;
+  /** false until the user has picked SanoAI AI or built-in rules. */
+  aiChoiceMade: boolean;
   consentChatMemory: boolean;
   readingLevel: "plain" | "detailed";
   language: string;
 }
 const toSettings = (r: Record<string, unknown> | null): Settings => ({
   consentExternalAi: !!r?.consent_external_ai,
+  aiChoiceMade: !!(r?.ai_choice_made || r?.consent_external_ai),
   consentChatMemory: r ? !!r.consent_chat_memory : true,
   readingLevel: r?.reading_level === "detailed" ? "detailed" : "plain",
   language: typeof r?.language === "string" ? r.language : "English",
@@ -66,10 +69,12 @@ export async function getSettings(userId: string): Promise<Settings> {
 }
 export async function updateSettings(userId: string, patch: Partial<Settings>): Promise<Settings> {
   const next = { ...(await getSettings(userId)), ...patch };
+  if (patch.consentExternalAi !== undefined) next.aiChoiceMade = true;
   await store.set("settings", {
     id: userId,
     user_id: userId,
     consent_external_ai: next.consentExternalAi,
+    ai_choice_made: next.aiChoiceMade,
     consent_chat_memory: next.consentChatMemory,
     reading_level: next.readingLevel,
     language: next.language,

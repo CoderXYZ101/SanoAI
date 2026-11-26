@@ -1,4 +1,5 @@
 "use client";
+import { managedAiUrl } from "@/lib/aiKeys";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ShieldCheck } from "lucide-react";
 import Link from "next/link";
@@ -130,7 +131,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                 </button>
               </div>
             </Field>
-            {isReg && (
+            {isReg && !managedAiUrl() && (
               <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-navy-100 bg-white p-3.5 text-[13px] leading-relaxed text-navy-600">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 accent-sano-600" />
                 <span>

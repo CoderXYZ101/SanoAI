@@ -40,6 +40,11 @@ export const SOURCES: SourceRef[] = [
   { id: "medlineplus-osteoporosis", title: "Osteoporosis", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/osteoporosis.html" },
   { id: "medlineplus-drugallergy", title: "Drug Allergy", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/drugallergy.html" },
   { id: "medlineplus-labtests", title: "Lab Tests Online — Reference ranges and test results", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/lab-tests/understanding-your-lab-results/" },
+  { id: "medlineplus-dietaryfats", title: "Dietary Fats", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/dietaryfats.html" },
+  { id: "medlineplus-fever", title: "Fever — Medical Encyclopedia", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/ency/article/003090.htm" },
+  { id: "medlineplus-cold", title: "Common Cold", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/commoncold.html" },
+  { id: "medlineplus-dehydration", title: "Dehydration", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/dehydration.html" },
+  { id: "who-obesity", title: "Obesity and overweight — Fact sheet", publisher: "World Health Organization", url: "https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight" },
   { id: "dailymed", title: "DailyMed — official drug labels", publisher: "US National Library of Medicine", url: "https://dailymed.nlm.nih.gov/dailymed/" },
   { id: "medlineplus-drugs", title: "Drugs, Herbs and Supplements", publisher: "MedlinePlus (US National Library of Medicine)", url: "https://medlineplus.gov/druginformation.html" },
 ];

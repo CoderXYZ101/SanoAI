@@ -91,7 +91,7 @@ export default function PricingPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Plans" title="Start free. Pay only if it helps your care." description="The core intelligence and every safety feature are free. Paid plans add managed AI (no key needed), more documents, secure doctor links and longer diary history." actions={<Segmented value={period} onChange={setPeriod} label="Billing period" options={[{ value: "month", label: "Monthly" }, { value: "year", label: "Yearly · 2 months free" }]} />} />
+      <PageHeader eyebrow="Plans" title="Start free. Pay only if it helps your care." description="The core intelligence and every safety feature are free. Every plan includes SanoAI AI; paid plans add more AI answers, documents, secure doctor links and diary history." actions={<Segmented value={period} onChange={setPeriod} label="Billing period" options={[{ value: "month", label: "Monthly" }, { value: "year", label: "Yearly · 2 months free" }]} />} />
 
       {data.demoBilling && <Callout tone="warn" title="Demo billing is on">Purchases here take effect instantly and no payment is taken. For real revenue, set up Razorpay payment pages and the webhook (see BILLING.md).</Callout>}
 
@@ -163,9 +163,9 @@ export default function PricingPage() {
           <div className="flex items-center gap-2"><Crown className="h-5 w-5 text-sano-600" /><h2 className="text-[15px] font-semibold text-navy-900">Your usage</h2></div>
           <div className="mt-4 space-y-4">
             <Meter label="Documents stored" used={docs.data?.documents.length ?? 0} max={data.limits.documents} />
-            <Meter label="Managed AI answers this month" used={data.usage.managedAi} max={data.limits.managedAiCalls} />
+            <Meter label="AI answers this month" used={data.usage.managedAi} max={data.limits.managedAiCalls} />
           </div>
-          <p className="mt-3 text-[12.5px] text-navy-400">{data.managedAiAvailable ? "Managed AI is available on paid plans." : "Managed AI isn't connected in this deployment. You can still add your own key in Settings."}</p>
+          <p className="mt-3 text-[12.5px] text-navy-400">{data.managedAiAvailable ? `SanoAI AI is included on every plan.${data.demoBilling ? " Demo plan switches do not raise the AI allowance." : ""}` : "SanoAI AI isn't connected yet. Built-in rules are always available."}</p>
         </Card>
         <Card className="card-pad">
           <div className="flex items-center gap-2"><Building2 className="h-5 w-5 text-sano-600" /><h2 className="text-[15px] font-semibold text-navy-900">Labs, clinics &amp; employers</h2></div>
