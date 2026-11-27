@@ -160,7 +160,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           </p>
           <p className="mt-8 flex items-start gap-2 text-xs leading-relaxed text-navy-400">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-sano-500" />
-            Sign-in is handled by Firebase Authentication. SanoAI is an information tool, not a medical service.
+            Sign-in is handled by Firebase Authentication. SanoAI is an information tool, not a medical service.{" "}
+            <Link href="/privacy" className="underline">Privacy</Link> · <Link href="/terms" className="underline">Terms</Link>
           </p>
         </motion.div>
       </main>

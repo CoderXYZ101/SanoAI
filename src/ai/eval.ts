@@ -88,6 +88,8 @@ export async function runEvals(): Promise<EvalResult[]> {
     const c = findDates("March 2024")[0];
     return a?.certainty === "ambiguous" && b?.certainty === "explicit" && b.iso === "2024-03-13" && c?.certainty === "partial" && c.iso === "2024-03" ? true : JSON.stringify([a, b, c]);
   });
+  await t("Extraction", "'no known drug allergies' is not read as 'no medication'", () => !extractWithRules({ id: "x", docType: "consultation", title: "t", text: "She reports no known drug allergies." }).events.some((e) => /no regular medication/i.test(e.title)));
+  await t("Extraction", "'not on any regular medication' is still recorded", () => extractWithRules({ id: "x", docType: "consultation", title: "t", text: "Patient is not on any regular medication." }).events.some((e) => /no regular medication/i.test(e.title)));
   await t("Extraction", "no date is invented when none is printed", () => {
     const r = extractWithRules({ id: "x", docType: "other", title: "t", text: "Haemoglobin 10.1 g/dL (12 - 15)\nFerritin 9 ng/mL (15 - 150)\nVitamin B12 300 pg/mL (200 - 900)" });
     return r.documentDate === null && r.events.every((e) => e.date === null && e.dateCertainty === "missing") ? true : JSON.stringify(r.documentDate);

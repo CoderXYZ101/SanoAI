@@ -99,7 +99,7 @@ export default function SettingsPage() {
         <Card className="card-pad space-y-6">
           {!managedAiUrl() && <Toggle checked={settings.consentExternalAi} onChange={(v) => update({ consentExternalAi: v })} label="Allow sending my information to an external AI service" description="Off by default. When on, the text of your questions and (for AI-assisted modules) your extracted records can be sent to the configured provider. Every call is logged below. Turn off to use rule-based engines only." disabled={!ai.provider.configured} />}
           {!managedAiUrl() && !ai.provider.configured && <p className="-mt-4 text-[12.5px] text-navy-400">No external AI provider is configured, so nothing can be sent anywhere.</p>}
-          <Toggle checked={settings.consentChatMemory} onChange={(v) => update({ consentChatMemory: v })} label="Let the assistant and modules use my records as context" description="Lets answers refer to your documents and health profile so you don't have to repeat yourself. Records stay inside your account either way." />
+          <Toggle checked={settings.consentChatMemory} onChange={(v) => update({ consentChatMemory: v })} label="Let the assistant and modules use my records as context" description="Lets answers refer to your documents and health profile so you don't have to repeat yourself. If SanoAI AI is on, the relevant details are sent with your question." />
         </Card>
       </section>
 

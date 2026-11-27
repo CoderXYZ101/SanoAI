@@ -13,3 +13,6 @@ firebase-debug.log
 
 
 .claude/
+
+# team-only competition documents (names, team ID)
+submission/

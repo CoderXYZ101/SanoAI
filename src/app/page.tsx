@@ -25,7 +25,7 @@ const STEPS = [
   { n: "04", t: "Talk to your doctor", d: "Walk in with a clear brief and the right questions. Share only what you choose, and revoke it any time." },
 ];
 const TRUST = [
-  { icon: Lock, t: "Private by design", d: "Per-account isolation enforced by Firestore security rules, with data encrypted at rest by Google Cloud. No SanoAI server ever sees it." },
+  { icon: Lock, t: "Private by design", d: "Per-account isolation enforced by Firestore security rules, with data encrypted at rest by Google Cloud. If you choose SanoAI AI, the text needed for an answer passes through SanoAI's relay to an AI provider." },
   { icon: Fingerprint, t: "Consent before any AI call", d: "Nothing leaves SanoAI for an external AI service unless you switch that on. Turn it off any time." },
   { icon: FileSearch, t: "A ledger of every AI call", d: "See each request — module, provider, size, outcome — in your own audit log. Never the content." },
   { icon: BadgeCheck, t: "Built not to fabricate", d: "Verbatim-quote verification, schema validation, a medical-language guard and cited references." },
@@ -94,6 +94,12 @@ export default function Landing() {
               <a href="#features" className="inline-flex h-12 items-center rounded-xl border border-white/20 px-6 text-[15px] font-medium text-white transition hover:bg-white/10">
                 Explore SanoAI
               </a>
+            </Reveal>
+            <Reveal delay={0.28}>
+              <p className="mt-4 text-[13.5px] text-navy-300">
+                No records handy?{" "}
+                <Link href="/register" className="font-medium text-sano-300 underline">Create a free account</Link> and load a fictional sample patient in one click.
+              </p>
             </Reveal>
             <Reveal delay={0.32}>
               <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[13px] text-navy-300">
@@ -284,7 +290,11 @@ export default function Landing() {
             <p>
               Educational information only. SanoAI cannot diagnose, treat or prescribe. Demonstration doctors, pharmacies and records are fictional. Always consult a qualified healthcare professional; in an emergency call 112.
             </p>
-            <p className="mt-3 text-navy-400">© {new Date().getFullYear()} SanoAI</p>
+            <p className="mt-3 text-navy-400">
+              © {new Date().getFullYear()} SanoAI ·{" "}
+              <Link href="/privacy" className="underline hover:text-white">Privacy &amp; responsible AI</Link> ·{" "}
+              <Link href="/terms" className="underline hover:text-white">Terms</Link>
+            </p>
           </div>
         </div>
       </footer>

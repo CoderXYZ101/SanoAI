@@ -400,7 +400,7 @@ export function extractWithRules(doc: RawDoc): RuleResult {
     }
     consumed.add(i);
     for (const it of items) {
-      if (/\b(no|not on|nil|none)\b[^.]{0,30}\b(regular )?(medication|medicine|drugs?|tablets)\b/i.test(it.text)) {
+      if (!/allerg/i.test(it.text) && /\b(no|not on|nil|none)\b[^.]{0,30}\b(regular )?(medication|medicine|drugs?|tablets)\b/i.test(it.text)) {
         events.push(base({ category: "medication", title: "No regular medication reported", ...eventDate(findDates(it.quote), documentDate), details: "Recorded as no regular medication in this document.", sourceQuote: it.quote }));
         continue;
       }
@@ -439,7 +439,8 @@ export function extractWithRules(doc: RawDoc): RuleResult {
   const medSeen = new Set<string>();
   lines.forEach((l, i) => {
     if (consumed.has(i)) return;
-    if (/\b(no|not on|nil|none)\b[^.]{0,30}\b(regular )?(medication|medicine|drugs?|tablets)\b/i.test(l)) {
+    // "no known drug allergies" is about allergies, not medicines
+    if (!/allerg/i.test(l) && /\b(no|not on|nil|none)\b[^.]{0,30}\b(regular )?(medication|medicine|drugs?|tablets)\b/i.test(l)) {
       consumed.add(i);
       events.push(base({ category: "medication", title: "No regular medication reported", ...eventDate(findDates(l), documentDate), details: "Recorded as no regular medication in this document.", sourceQuote: l }));
       return;

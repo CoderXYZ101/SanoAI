@@ -22,6 +22,6 @@ Medical Timeline reconstruction (source-linked, uncertain dates flagged) · Blin
 ## Honest status
 - Verified in a real browser against the Firebase **emulators**: register, email verification, login, demo records, all modules, plan limits, share links, a UPI claim and its admin approval. `test:rules` covers the security rules (other-user, self-upgrade, self-approval and reference reuse are denied).
 - Google sign-in is checked only at the account/rules level on the emulator; the popup itself, real verification emails and a real UPI payment have not been tried.
-- **Not run live:** Firebase production deploy, Razorpay webhook worker, managed-AI worker, and AI providers from the browser (CORS checked: Gemini, DeepSeek, OpenRouter, Anthropic allow it; NVIDIA doesn't).
+- Deployed to Firebase Hosting with the AI relay on Cloudflare. Signed-in features and live AI answers on the deployed site still need a full manual check. The Razorpay webhook worker has not been run.
 - Doctors/pharmacies are fictional demo data. The knowledge base is a short summary of public sources and needs clinical review before real use.
 - A previous server-based version lives in `../SanoAI-server-edition`.

@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui";
 import VerifyEmail from "@/components/VerifyEmail";
 import { isAdmin } from "@/lib/payments";
 import { useAuth } from "@/lib/auth";
+import { listDocuments } from "@/lib/repo";
 
 /** Client-side route guard: every page in this group requires a signed-in Firebase user. */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -40,6 +41,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     aiStatus(user.id).then((s) => setAi({ effective: s.effective, label: s.provider.label })).catch(() => {});
   }, [user, path, choices, aiChanges]);
 
+  const [sample, setSample] = useState(false);
+  useEffect(() => {
+    if (!user?.verified) return setSample(false);
+    listDocuments(user.id).then((docs) => setSample(docs.some((d) => d.isDemo))).catch(() => {});
+  }, [user, path]);
+
   if (!ready || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center" role="status" aria-label="Loading">
@@ -50,6 +57,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!user.verified) return <VerifyEmail email={user.email} />;
   return (
     <AppShell user={{ name: user.name, email: user.email }} ai={ai} isAdmin={admin}>
+      {sample && (
+        <p role="note" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-[13px] text-amber-900">
+          <strong>Sample data:</strong> this account includes fictional demonstration records, not a real patient.
+        </p>
+      )}
       <div key={choices}>{children}</div>
       <AiChoice userId={user.id} onChosen={() => setChoices((n) => n + 1)} />
     </AppShell>
