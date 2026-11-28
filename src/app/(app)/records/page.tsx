@@ -106,9 +106,9 @@ function Records() {
   return (
     <div className="space-y-8">
       <PageHeader
-        eyebrow="My medical records"
-        title="Your documents, private to you"
-        description="Upload reports, prescriptions and summaries. Originals are never modified, and only you can read them; SanoAI keeps what it extracted separate from what the document says."
+        eyebrow="My records"
+        title="Your reports in one place"
+        description="Add reports, prescriptions and summaries. Only you can see them."
         actions={
           hasDemo ? (
             <Button variant="secondary" onClick={() => act("demo", () => apiFetch("/api/documents/demo", { method: "DELETE" }), "Demo records removed.")} loading={busyId === "demo"} icon={<Trash2 className="h-4 w-4" />}>

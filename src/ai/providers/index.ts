@@ -43,7 +43,7 @@ export function resolveProviders(ctx: ProviderContext = { managedAllowed: false 
     : null;
   const url = managedAiUrl();
   if (url) {
-    const sanoAi = ctx.managedAllowed ? openaiCompatibleProvider({ id: "managed", label: "SanoAI AI", baseUrl: url, apiKey: async () => (await getIdToken()) ?? "", model: "managed", external: true, supportsImages: true, jsonMode: false, timeoutMs: 130_000 }) : null;
+    const sanoAi = ctx.managedAllowed ? openaiCompatibleProvider({ id: "managed", label: "SanoAI AI", baseUrl: url, apiKey: async () => (await getIdToken()) ?? "", model: "managed", external: true, supportsImages: true, jsonMode: false, timeoutMs: 55_000 }) : null;
     return [ollama, sanoAi].filter((p): p is LlmProvider => p !== null);
   }
   const out: LlmProvider[] = [];

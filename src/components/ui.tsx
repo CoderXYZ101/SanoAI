@@ -46,7 +46,7 @@ const VARIANTS: Record<Variant, string> = {
   dark: "bg-navy-900 text-white hover:bg-navy-800",
   "outline-light": "border border-white/25 text-white hover:bg-white/10",
 };
-const SIZES = { sm: "h-8 px-3 text-[13px] gap-1.5", md: "h-10 px-4 text-sm gap-2", lg: "h-12 px-6 text-[15px] gap-2.5" };
+const SIZES = { sm: "h-9 px-3.5 text-[13px] gap-1.5", md: "h-11 px-4 text-sm gap-2", lg: "h-[52px] px-6 text-[15px] gap-2.5" };
 
 interface BtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -96,13 +96,16 @@ export function SectionTitle({ title, hint, action }: { title: string; hint?: st
 
 export function PageHeader({ eyebrow, title, description, actions }: { eyebrow?: string; title: string; description?: string; actions?: ReactNode }) {
   return (
-    <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div className="max-w-2xl">
-        {eyebrow && <p className="eyebrow mb-1.5">{eyebrow}</p>}
-        <h1 className="text-[26px] font-semibold leading-tight text-navy-900 sm:text-[30px]">{title}</h1>
-        {description && <p className="mt-2 text-[15px] leading-relaxed text-navy-500">{description}</p>}
+    <header className="no-print relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-navy-900 via-navy-800 to-sano-700 px-6 py-6 text-white shadow-lift sm:px-8 sm:py-7">
+      <div className="pointer-events-none absolute -right-12 -top-20 h-56 w-56 rounded-full bg-cyanx-500/25 blur-3xl" />
+      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="max-w-2xl">
+          {eyebrow && <p className="mb-1.5 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-sano-200">{eyebrow}</p>}
+          <h1 className="text-[26px] font-semibold leading-tight sm:text-[32px]">{title}</h1>
+          {description && <p className="mt-2 text-[15px] leading-relaxed text-navy-100">{description}</p>}
+        </div>
+        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }

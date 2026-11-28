@@ -64,9 +64,9 @@ export default function BlindSpotsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Diagnostic Blind-Spot Detector"
-        title="What your records don't say"
-        description="SanoAI reads across your documents for information that is unclear, missing or inconsistent — and turns it into questions to discuss with a clinician. It never says a diagnosis was missed or that anyone made a mistake."
+        eyebrow="What's missing"
+        title="Gaps in your health records"
+        description="SanoAI looks for missing results, mismatched details and open questions, then turns them into questions for your doctor."
         actions={
           <Button onClick={run} loading={running} icon={<ScanSearch className="h-4 w-4" />} disabled={!hasRecords}>
             {data.ai.effective === "live" ? "Run deeper AI analysis" : "Re-run analysis"}

@@ -51,7 +51,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Settings" title="Privacy, AI and your data" description="You decide what SanoAI may do with your information — and you can see everything it has done." />
+      <PageHeader eyebrow="Settings" title="Your privacy and AI" description="Choose how SanoAI answers, and see everything it has done with your information." />
 
       {managedAiUrl() ? (
         <section id="ai" className="scroll-mt-24">
@@ -144,13 +144,13 @@ export default function SettingsPage() {
       </section>
 
       <section>
-        <SectionTitle title="What is real, what is simulated" hint="Honest capability report for this installation" />
+        <SectionTitle title="What is working" hint="An honest report for this installation" />
         <Card className="card-pad">
           {status.data ? (
             <ul className="space-y-3 text-[13.5px]">
               <li className="flex flex-wrap items-center gap-2"><Badge tone={status.data.ai.configured ? "green" : "amber"}>{status.data.ai.configured ? "Configured" : "Not configured"}</Badge><strong>AI provider:</strong> {status.data.ai.label}{status.data.ai.model ? ` (${status.data.ai.model})` : ""}</li>
               {Object.entries(status.data.integrations).map(([k, v]) => (
-                <li key={k} className="flex flex-wrap items-center gap-2"><Badge tone="amber">Simulated</Badge><strong>{k === "doctorDirectory" ? "Doctor directory & booking:" : "Pharmacy network:"}</strong> {v.note}</li>
+                <li key={k} className="flex flex-wrap items-center gap-2"><Badge tone={v.configured ? "green" : "slate"}>{v.configured ? "Working" : "Not set up"}</Badge><strong>{k === "carePlaces" ? "Find care:" : k === "managedAi" ? "SanoAI AI:" : "Billing:"}</strong> {v.note}</li>
               ))}
               <li className="flex flex-wrap items-center gap-2"><Badge tone={status.data.security.secretsConfigured ? "green" : "amber"}>{status.data.security.secretsConfigured ? "Set" : "Dev fallback"}</Badge><strong>Secrets:</strong> {status.data.security.note}</li>
             </ul>

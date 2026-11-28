@@ -113,7 +113,7 @@ export default function DeficiencyPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="AI Deficiency Finder" title="Your nutritional markers, explained" description="Values are read from your lab reports and compared only with the reference range printed on each report. SanoAI explains what each marker does — it does not diagnose a deficiency or recommend supplements." />
+      <PageHeader eyebrow="Nutrients check" title="Your vitamins and blood values" description="Your results compared with the range printed on each lab report, explained in simple words." />
       {!data.hasRecords ? (
         <NoRecords what="The Deficiency Finder" onLoaded={reload} />
       ) : (

@@ -5,17 +5,12 @@ export interface RouteEntry {
   load: () => Promise<Record<string, unknown>>;
 }
 export const REGISTRY: RouteEntry[] = [
-  { pattern: new RegExp("^/api/doctors/appointments/?$"), keys: [], load: () => import("./routes/doctors/appointments/route") },
-  { pattern: new RegExp("^/api/pharmacy/pharmacies/?$"), keys: [], load: () => import("./routes/pharmacy/pharmacies/route") },
   { pattern: new RegExp("^/api/pharmacy/medicines/?$"), keys: [], load: () => import("./routes/pharmacy/medicines/route") },
-  { pattern: new RegExp("^/api/doctors/messages/?$"), keys: [], load: () => import("./routes/doctors/messages/route") },
-  { pattern: new RegExp("^/api/pharmacy/enquiry/?$"), keys: [], load: () => import("./routes/pharmacy/enquiry/route") },
   { pattern: new RegExp("^/api/cross-specialty/?$"), keys: [], load: () => import("./routes/cross-specialty/route") },
   { pattern: new RegExp("^/api/settings/export/?$"), keys: [], load: () => import("./routes/settings/export/route") },
   { pattern: new RegExp("^/api/documents/demo/?$"), keys: [], load: () => import("./routes/documents/demo/route") },
   { pattern: new RegExp("^/api/pharmacy/label/?$"), keys: [], load: () => import("./routes/pharmacy/label/route") },
   { pattern: new RegExp("^/api/settings/audit/?$"), keys: [], load: () => import("./routes/settings/audit/route") },
-  { pattern: new RegExp("^/api/doctors/share/?$"), keys: [], load: () => import("./routes/doctors/share/route") },
   { pattern: new RegExp("^/api/system/status/?$"), keys: [], load: () => import("./routes/system/status/route") },
   { pattern: new RegExp("^/api/blind-spots/?$"), keys: [], load: () => import("./routes/blind-spots/route") },
   { pattern: new RegExp("^/api/share-links/?$"), keys: [], load: () => import("./routes/share-links/route") },
@@ -30,7 +25,6 @@ export const REGISTRY: RouteEntry[] = [
   { pattern: new RegExp("^/api/timeline/?$"), keys: [], load: () => import("./routes/timeline/route") },
   { pattern: new RegExp("^/api/auth/me/?$"), keys: [], load: () => import("./routes/auth/me/route") },
   { pattern: new RegExp("^/api/billing/?$"), keys: [], load: () => import("./routes/billing/route") },
-  { pattern: new RegExp("^/api/doctors/?$"), keys: [], load: () => import("./routes/doctors/route") },
   { pattern: new RegExp("^/api/profile/?$"), keys: [], load: () => import("./routes/profile/route") },
   { pattern: new RegExp("^/api/events/?$"), keys: [], load: () => import("./routes/events/route") },
   { pattern: new RegExp("^/api/redeem/?$"), keys: [], load: () => import("./routes/redeem/route") },

@@ -93,7 +93,7 @@ export default function SimulatorPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Counterfactual Health Simulator" title="Explore “what if” — safely" description="Change habits and see how they line up with public-health guidance across five areas of health. This is an educational model, not a prediction of what will happen to you." />
+      <PageHeader eyebrow="What if…?" title="See how your habits add up" description="Try changes to sleep, activity and food and compare them with public health advice. This is learning, not a prediction." />
       <Callout tone="warn" title="Educational simulation — not a clinically validated prediction">It compares habits with published guidance and describes associations from population evidence. It does not calculate your risk, use your genetics or conditions, or foretell outcomes.</Callout>
 
       <div className="grid gap-6 lg:grid-cols-[380px_1fr]">

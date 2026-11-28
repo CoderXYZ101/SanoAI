@@ -30,7 +30,7 @@ function Assistant() {
   const [convs, setConvs] = useState<Conv[]>([]);
   const [convId, setConvId] = useState<string | null>(params.get("c"));
   const [messages, setMessages] = useState<ChatMessageDTO[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(params.get("q") ?? "");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<{ text: string; retry: string } | null>(null);
   const [showList, setShowList] = useState(false);
@@ -193,7 +193,7 @@ function Assistant() {
             <button className="rounded-lg p-1.5 text-navy-500 hover:bg-navy-50 md:hidden" onClick={() => setShowList(true)} aria-label="Open conversation history"><History className="h-5 w-5" /></button>
             <LogoMark size={28} />
             <div>
-              <h1 className="text-[15px] font-semibold text-navy-900">AI Health Assistant</h1>
+              <h1 className="text-[15px] font-semibold text-navy-900">Ask Sano</h1>
               <p className="text-[12px] text-navy-400">{ctx?.memory ? "Using your records and profile as context" : "Not using your records (change in Settings)"}</p>
             </div>
           </div>
@@ -316,7 +316,7 @@ function Message({ m, onFollow, onSpeak, speaking }: { m: ChatMessageDTO; onFoll
                         </div>
                       ))}
                     </div>
-                    <Link href="/uncertainty" className="mt-2 inline-block text-[12px] font-medium text-sano-700 hover:underline">Open the full Uncertainty Engine</Link>
+                    <Link href="/uncertainty" className="mt-2 inline-block text-[12px] font-medium text-sano-700 hover:underline">See how sure we can be</Link>
                   </motion.div>
                 )}
               </AnimatePresence>

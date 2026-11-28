@@ -22,14 +22,14 @@ import { latestByKey } from "./signals";
 type Meta = NonNullable<ChatMessageDTO["meta"]>;
 
 const MODULES: { re: RegExp; href: string; label: string }[] = [
-  { re: /\b(timeline|my (history|reports|records)|chronolog)/i, href: "/timeline", label: "Medical Timeline" },
-  { re: /\b(missing|gaps?|overlooked|unanswered|inconsisten|conflict|blind[- ]?spot)/i, href: "/blind-spots", label: "Blind-Spot Detector" },
-  { re: /\bwhat if\b|\bscenario|\bsimulat|if i (sleep|exercise|walk|eat|quit|stop drinking)/i, href: "/simulator", label: "Counterfactual Simulator" },
-  { re: /\b(uncertain|how sure|confidence|can'?t (you )?be sure)/i, href: "/uncertainty", label: "Uncertainty Engine" },
-  { re: /\b(specialist|cardiolog|endocrin|neurolog|gastro).*(connect|relat|link)|cross[- ]specialty/i, href: "/cross-specialty", label: "Cross-Specialty Intelligence" },
-  { re: /\b(deficien|b12|vitamin|ferritin|iron|folate|haemoglobin|hemoglobin|blood test|lab result)/i, href: "/deficiency", label: "Deficiency Finder" },
-  { re: /\b(find|see|book).*(doctor|specialist)|appointment/i, href: "/doctors", label: "Find Doctors" },
-  { re: /\b(pharmacy|medicine (label|available)|in stock|where (can i )?(buy|get))/i, href: "/pharmacy", label: "Pharmacy Connector" },
+  { re: /\b(timeline|my (history|reports|records)|chronolog)/i, href: "/timeline", label: "Health story" },
+  { re: /\b(missing|gaps?|overlooked|unanswered|inconsisten|conflict|blind[- ]?spot)/i, href: "/blind-spots", label: "What's missing" },
+  { re: /\bwhat if\b|\bscenario|\bsimulat|if i (sleep|exercise|walk|eat|quit|stop drinking)/i, href: "/simulator", label: "What if…?" },
+  { re: /\b(uncertain|how sure|confidence|can'?t (you )?be sure)/i, href: "/uncertainty", label: "How sure can we be?" },
+  { re: /\b(specialist|cardiolog|endocrin|neurolog|gastro).*(connect|relat|link)|cross[- ]specialty/i, href: "/cross-specialty", label: "Body connections" },
+  { re: /\b(deficien|b12|vitamin|ferritin|iron|folate|haemoglobin|hemoglobin|blood test|lab result)/i, href: "/deficiency", label: "Nutrients check" },
+  { re: /\b(find|see|book).*(doctor|specialist)|appointment/i, href: "/doctors", label: "Find care" },
+  { re: /\b(pharmacy|medicine (label|available)|in stock|where (can i )?(buy|get))/i, href: "/pharmacy", label: "Medicines" },
 ];
 
 const RECORD_Q = /\b(my|mine)\b.*\b(result|report|test|record|medication|medicine|history|level|value|blood|document)s?\b|\bsummari[sz]e\b|\bwhat (do|does) my\b|\bin my (records|reports)\b/i;
@@ -145,10 +145,10 @@ export async function chatTurn(inp: ChatInput): Promise<{ content: string; meta:
       CONSULT_BRIEF.test(message) ? "### Consultation summary (from your records)" : "### Summary of your records",
       tl.summary,
       "**Key points**\n" + brief.split("\n").map((l) => `- ${l}`).join("\n"),
-      `Open the [Medical Timeline](/timeline) to inspect each item and its source document, or the [Doctor Brief](/brief) for a printable one-pager.`,
+      `Open the [Health story](/timeline) to inspect each item and its source document, or the [Doctor Brief](/brief) for a printable one-pager.`,
       "_This restates your documents; it is not a diagnosis. Extracted details can contain errors — check them against the originals._",
     ].join("\n\n");
-    return { content, meta: { ai: (await demoMetaFor(inp.userId)), citations: [], followUps: ["What information might be missing from my records?", "Which of my results are outside the lab's range?", "Prepare questions for my next appointment"], safety: tri.level === "urgent" ? { level: "urgent", message: tri.message } : null, modules: [{ href: "/timeline", label: "Medical Timeline" }, { href: "/brief", label: "Doctor Brief" }], usedRecords: true } };
+    return { content, meta: { ai: (await demoMetaFor(inp.userId)), citations: [], followUps: ["What information might be missing from my records?", "Which of my results are outside the lab's range?", "Prepare questions for my next appointment"], safety: tri.level === "urgent" ? { level: "urgent", message: tri.message } : null, modules: [{ href: "/timeline", label: "Health story" }, { href: "/brief", label: "Doctor Brief" }], usedRecords: true } };
   }
 
   const unc = hits.length ? assessUncertaintyRules(q, hasRecords ? inp.events : [], inp.profile, hits) : null;

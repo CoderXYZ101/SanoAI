@@ -20,8 +20,7 @@ export const GET = authed(async (_req, { user }) => {
       reason: ai.reason,
     },
     integrations: {
-      doctorDirectory: { configured: false, implemented: false, note: "Demonstration directory in use (fictional doctors)." },
-      pharmacyNetwork: { configured: false, implemented: false, note: "Demonstration pharmacies in use; no live stock or e-prescription verification." },
+      carePlaces: { configured: true, implemented: true, note: "Real pharmacies, hospitals and clinics from OpenStreetMap. No booking or live stock." },
       managedAi: { configured: Boolean(managedAiUrl()), implemented: true, note: managedAiUrl() ? "SanoAI AI proxy configured (all plans)." : "No managed-AI proxy configured; users bring their own AI key or run offline." },
       billing: { configured: demoBilling() || Boolean(process.env.NEXT_PUBLIC_RAZORPAY_LINK_PLUS), implemented: true, note: demoBilling() ? "DEMO billing: plans switch without payment." : process.env.NEXT_PUBLIC_RAZORPAY_LINK_PLUS ? "Razorpay payment pages configured." : "No payment link configured." },
     },

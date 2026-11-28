@@ -105,7 +105,7 @@ export default function DiaryPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Health Diary" title="Small daily notes, a clearer picture" description="Log sleep, mood, energy, stress and symptoms in under a minute. Trends help you notice patterns — and give your clinician real data instead of memory." />
+      <PageHeader eyebrow="Health diary" title="How are you today?" description="Note your sleep, mood, energy and symptoms in under a minute, and watch the pattern over time." />
 
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
         <Card className="card-pad space-y-5">

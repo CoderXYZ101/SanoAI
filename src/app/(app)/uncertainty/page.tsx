@@ -65,7 +65,7 @@ export default function UncertaintyPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader eyebrow="Medical Uncertainty Engine" title="Why SanoAI can't be definitive — and what it can say" description="Most health chatbots sound sure. This engine does the opposite: it separates what is known, what is only possible, and what is missing, and shows the basis for every statement." />
+      <PageHeader eyebrow="How sure can we be?" title="What's known, and what isn't" description="Ask a question. SanoAI separates what your records support from what is only possible or still missing." />
 
       <Card className="card-pad">
         <label htmlFor="uq" className="text-[13px] font-medium text-navy-700">What would you like to understand?</label>

@@ -71,9 +71,9 @@ export default function TimelinePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Medical Timeline Reconstruction"
-        title="Your history, in order"
-        description="Every item is traced to the exact line of the document it came from. Dates that aren't clearly printed are marked, never guessed."
+        eyebrow="Health story"
+        title="Your health, in order"
+        description="Everything from your reports on one timeline. Open any item to see the exact line it came from."
         actions={
           <>
             <Button variant="secondary" icon={<FilePlus2 className="h-4 w-4" />} onClick={() => setAdding(true)} disabled={!data.documents.length}>

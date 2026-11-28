@@ -44,6 +44,10 @@ export default function PrivacyPage() {
           ],
         },
         {
+          h: "Finding care near you",
+          p: "When you search for pharmacies, doctors or hospitals, the area you type, or your device location if you allow it, is sent to OpenStreetMap's search service. Your health records are not sent. Directions open in Google Maps if you choose them.",
+        },
+        {
           h: "Your choices",
           items: [
             "Switch between SanoAI AI and built-in rules in Settings.",

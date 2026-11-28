@@ -120,11 +120,13 @@ export async function runStructured<T>(o: Opts<T>): Promise<StructuredResult<T>>
   delete jsonSchema.$schema;
   const failures: string[] = [];
 
+  const started = Date.now();
   for (const provider of chain) {
     let feedback = "";
     let lastError = "unknown error";
     let skipRest = false;
-    for (let attempt = 0; attempt < 2 && !skipRest; attempt++) {
+    // a second try only when the first answered quickly, so nobody waits minutes for a page
+    for (let attempt = 0; attempt < 2 && !skipRest && (attempt === 0 || Date.now() - started < 20_000); attempt++) {
       try {
         const raw = await provider.generateJSON({ system: o.system, user: o.user + feedback, attachments: o.attachments, maxTokens: o.maxTokens }, o.schemaName, jsonSchema);
         const parsed = o.schema.safeParse(raw);
@@ -153,8 +155,8 @@ export async function runStructured<T>(o: Opts<T>): Promise<StructuredResult<T>>
       } catch (e) {
         const pe = e instanceof ProviderError ? e : null;
         lastError = pe?.message ?? "unexpected error";
-        // transient → one retry on the same provider; anything else → move to the next provider
-        if (pe && (pe.kind === "timeout" || pe.kind === "network" || pe.kind === "bad_response") && attempt === 0 && provider.external) continue;
+        // an unreadable answer gets one retry; a timeout or network failure moves straight on
+        if (pe && pe.kind === "bad_response" && attempt === 0 && provider.external) continue;
         skipRest = true;
       }
     }

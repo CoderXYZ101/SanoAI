@@ -84,9 +84,9 @@ export default function CrossSpecialtyPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Cross-Specialty Medical Intelligence"
-        title="Where your specialties meet"
-        description="Findings from one specialty can matter to another. SanoAI places each area on a 3D body map and links the ones your own records connect — as associations to raise with your clinicians, never as diagnoses."
+        eyebrow="Body connections"
+        title="How your health areas link"
+        description="See which parts of your health may be connected, based on your own records. These are things to ask about, not diagnoses."
         actions={
           data.hasRecords && (
             <Button variant="secondary" onClick={run} loading={running} icon={<Sparkles className="h-4 w-4" />}>

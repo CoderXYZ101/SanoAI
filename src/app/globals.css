@@ -33,7 +33,7 @@
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-navy-100/80 bg-white shadow-soft;
+    @apply rounded-3xl border border-navy-100/80 bg-white shadow-soft;
   }
   .card-pad {
     @apply p-5 sm:p-6;

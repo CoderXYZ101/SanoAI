@@ -15,7 +15,7 @@ export default function BriefPage() {
   return (
     <div className="space-y-6">
       <div className="no-print">
-        <PageHeader eyebrow="Consultation summary" title="Doctor brief" description="A one-page summary assembled only from your own documents, with every item traceable to its source. Print it, save it as PDF, or copy it into a message." actions={data.hasRecords && (<><CopyButton text={data.text} label="Copy as text" /><Button icon={<Printer className="h-4 w-4" />} onClick={() => window.print()}>Print / save as PDF</Button></>)} />
+        <PageHeader eyebrow="For your doctor" title="Your one-page summary" description="Made only from your own reports. Print it, save it as a PDF, or copy it into a message." actions={data.hasRecords && (<><CopyButton text={data.text} label="Copy as text" /><Button icon={<Printer className="h-4 w-4" />} onClick={() => window.print()}>Print / save as PDF</Button></>)} />
       </div>
       {!data.hasRecords ? (
         <NoRecords what="The doctor brief" onLoaded={reload} />

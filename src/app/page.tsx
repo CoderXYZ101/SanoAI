@@ -14,8 +14,8 @@ const CORE = [
 const MORE = [
   { icon: MessageSquareHeart, t: "AI Health Assistant", d: "Cited answers, voice in/out, urgent-care safety net" },
   { icon: Droplets, t: "Deficiency Finder", d: "B12, D, iron, ferritin, haemoglobin, calcium, folate — against your lab's own ranges" },
-  { icon: Stethoscope, t: "Talk to Doctors", d: "Discover clinicians, prepare a brief, share with explicit consent" },
-  { icon: Pill, t: "Pharmacy Connector", d: "Understand labels, draft availability enquiries — never prescribes" },
+  { icon: Stethoscope, t: "Find care", d: "Real hospitals and clinics near you, with call and directions" },
+  { icon: Pill, t: "Medicines", d: "Real pharmacies nearby, plain-language labels — never prescribes" },
   { icon: HeartPulse, t: "Doctor Brief", d: "A printable one-page summary traceable to your documents" },
 ];
 const STEPS = [
@@ -288,7 +288,7 @@ export default function Landing() {
           </div>
           <div className="max-w-md leading-relaxed">
             <p>
-              Educational information only. SanoAI cannot diagnose, treat or prescribe. Demonstration doctors, pharmacies and records are fictional. Always consult a qualified healthcare professional; in an emergency call 112.
+              Educational information only. SanoAI cannot diagnose, treat or prescribe. Sample records are fictional. Places are from OpenStreetMap. Always consult a qualified healthcare professional; in an emergency call 112.
             </p>
             <p className="mt-3 text-navy-400">
               © {new Date().getFullYear()} SanoAI ·{" "}

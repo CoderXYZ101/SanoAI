@@ -21,7 +21,7 @@ export default function TermsPage() {
         {
           h: "Prototype limits",
           items: [
-            "Doctors, pharmacies and sample records are fictional. SanoAI does not make bookings or confirm stock.",
+            "Sample records are fictional. Places come from OpenStreetMap and may be incomplete or out of date. SanoAI does not make bookings or confirm stock.",
             "AI answers can be wrong or incomplete, and free AI services can be slow or unavailable.",
             "The service may change, stop or lose data at any time. Keep your own copies of your records.",
           ],
